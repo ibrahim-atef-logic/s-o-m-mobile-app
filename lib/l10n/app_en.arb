@@ -1,0 +1,142 @@
+{
+  "@@locale": "en",
+  "appTitle": "Sales Orders Management",
+  "welcome": "Welcome",
+  "helloTitle": "Sales Orders Management",
+  "helloSubtitle": "Scan, add, and manage sales order lines on the floor",
+  "login": "Login",
+  "loginTitle": "Sign in",
+  "logout": "Logout",
+  "personnelNumber": "Personnel number",
+  "personnelNumberHint": "Enter your employee number",
+  "password": "Password",
+  "passwordHint": "Enter your password",
+  "companyCode": "Company",
+  "companyCodeHint": "Dynamics company code (e.g. usmf)",
+  "errorCompanyRequired": "Company is required",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "errorPersonnelRequired": "Personnel number is required",
+  "errorPasswordRequired": "Password is required",
+  "selectCompany": "Select company",
+  "selectCompanyHint": "Choose the company to work with",
+  "noCompanies": "No companies available",
+  "searchCompanies": "Search companies",
+  "mySalesOrders": "My sales orders",
+  "ordersCount": "{count, plural, =0{No orders} =1{1 order} other{{count} orders}}",
+  "@ordersCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "searchOrders": "Search orders",
+  "noOrders": "No open sales orders",
+  "noOrdersMatchSearch": "No orders match your search",
+  "salesOrderDetails": "Sales order details",
+  "orderSummary": "Order summary",
+  "viewLines": "View lines",
+  "viewLinesDesc": "Browse existing order lines",
+  "fullAdd": "Full add",
+  "fullAddDesc": "Lookup price and stock, then add",
+  "quickAdd": "Quick add",
+  "quickAddDesc": "Scan and batch submit up to 10 lines",
+  "failedLines": "Failed lines",
+  "failedLinesDesc": "Review lines that failed to post",
+  "failedLinesEmpty": "No failed lines",
+  "failureReason": "Reason",
+  "addItem": "Add item",
+  "addToCart": "Add to cart",
+  "scanBarcode": "Scan barcode",
+  "scanWithCamera": "Scan with camera",
+  "toggleTorch": "Toggle torch",
+  "lastScanned": "Last scanned",
+  "barcode": "Barcode",
+  "lookup": "Lookup",
+  "getQuantity": "Get quantity",
+  "availableQty": "Available quantity",
+  "price": "Price",
+  "submit": "Submit",
+  "submitBatch": "Submit batch",
+  "cartEmpty": "Cart is empty",
+  "lineAdded": "Line added",
+  "batchSubmitted": "Batch submitted",
+  "submitResultTitle": "Submit result",
+  "succeededCount": "{count, plural, =0{0 succeeded} =1{1 succeeded} other{{count} succeeded}}",
+  "@succeededCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "failedCount": "{count, plural, =0{0 failed} =1{1 failed} other{{count} failed}}",
+  "@failedCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "stepScan": "Scan",
+  "stepQuantity": "Quantity",
+  "stepAdd": "Add",
+  "stockInStock": "In stock",
+  "stockLow": "Low stock",
+  "stockOut": "Out of stock",
+  "cartItemCount": "{count, plural, =0{No items} =1{1 item} other{{count} items}}",
+  "@cartItemCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "removeFromCart": "Remove from cart",
+  "customer": "Customer",
+  "warehouse": "Warehouse",
+  "priceGroup": "Price group",
+  "item": "Item",
+  "quantity": "Quantity",
+  "qtyLabel": "Qty",
+  "unitPrice": "Unit price",
+  "lineTotal": "Line total",
+  "linesTitle": "Lines · {salesId}",
+  "@linesTitle": {
+    "placeholders": {
+      "salesId": {"type": "String"}
+    }
+  },
+  "noLines": "No lines found",
+  "linesSummary": "{count, plural, =0{No lines} =1{1 line} other{{count} lines}}",
+  "@linesSummary": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "errorBarcodeRequired": "Barcode is required",
+  "errorNoPrice": "No price is defined for this product",
+  "errorNoStock": "No available stock for this product",
+  "errorQtyInvalid": "Quantity must be a whole number of at least 1",
+  "errorQtyExceeds": "Quantity exceeds available stock",
+  "errorLookupRequired": "Lookup the barcode first",
+  "errorMaxQuickLines": "Quick add allows max 10 lines",
+  "errorGeneric": "Something went wrong",
+  "errorNetwork": "No internet connection",
+  "errorServer": "Server error",
+  "errorAuth": "Invalid credentials",
+  "errorAuthCompanyUnknown": "Company is not registered",
+  "errorAuthCredentials": "Invalid personnel number or password",
+  "errorTimeout": "Request timed out",
+  "errorSessionExpired": "Session expired — please sign in again",
+  "errorDynamicsUnavailable": "Dynamics environment is unavailable — try again shortly",
+  "errorValidation": "Please check your input",
+  "errorCache": "Could not read local data",
+  "errorMissingOrder": "Missing order",
+  "errorMissingSession": "Missing session",
+  "retry": "Retry",
+  "cancel": "Cancel",
+  "close": "Close",
+  "save": "Save",
+  "search": "Search",
+  "refresh": "Refresh",
+  "details": "Details",
+  "back": "Back",
+  "continueLabel": "Continue",
+  "language": "Language",
+  "arabic": "العربية",
+  "english": "English"
+}
