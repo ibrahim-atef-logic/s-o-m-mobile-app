@@ -1,3 +1,4 @@
+import '../../../../core/utils/json_string.dart';
 import '../../domain/entities/price_info_entity.dart';
 
 class PriceInfoModel {
@@ -19,12 +20,12 @@ class PriceInfoModel {
 
   factory PriceInfoModel.fromJson(Map<String, dynamic> json) {
     return PriceInfoModel(
-      itemNumber: json['itemNumber'] as String? ?? '',
+      itemNumber: JsonString.trim(json['itemNumber']),
       price: (json['price'] as num?)?.toDouble() ?? 0,
-      unitId: json['unitId'] as String? ?? '',
-      customerAccountNumber: json['customerAccountNumber'] as String? ?? '',
-      priceCustomerGroupCode: json['priceCustomerGroupCode'] as String? ?? '',
-      dataArea: json['dataArea'] as String? ?? '',
+      unitId: JsonString.trim(json['unitId']),
+      customerAccountNumber: JsonString.trim(json['customerAccountNumber']),
+      priceCustomerGroupCode: JsonString.trim(json['priceCustomerGroupCode']),
+      dataArea: JsonString.trim(json['dataArea']),
     );
   }
 

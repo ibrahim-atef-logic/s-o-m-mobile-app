@@ -1,3 +1,4 @@
+import '../../../../core/utils/json_string.dart';
 import '../../domain/entities/barcode_item_entity.dart';
 
 class BarcodeItemModel {
@@ -19,12 +20,12 @@ class BarcodeItemModel {
 
   factory BarcodeItemModel.fromJson(Map<String, dynamic> json) {
     return BarcodeItemModel(
-      barcode: json['barcode'] as String? ?? '',
-      itemNumber: json['itemNumber'] as String? ?? '',
-      productName: json['productName'] as String? ?? '',
-      productDescription: json['productDescription'] as String? ?? '',
-      unitId: json['unitId'] as String? ?? '',
-      dataArea: json['dataArea'] as String? ?? '',
+      barcode: JsonString.trim(json['barcode']),
+      itemNumber: JsonString.trim(json['itemNumber']),
+      productName: JsonString.trim(json['productName']),
+      productDescription: JsonString.trim(json['productDescription']),
+      unitId: JsonString.trim(json['unitId']),
+      dataArea: JsonString.trim(json['dataArea']),
     );
   }
 

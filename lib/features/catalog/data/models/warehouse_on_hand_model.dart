@@ -1,3 +1,4 @@
+import '../../../../core/utils/json_string.dart';
 import '../../domain/entities/warehouse_on_hand_entity.dart';
 
 class WarehouseOnHandModel {
@@ -19,14 +20,14 @@ class WarehouseOnHandModel {
 
   factory WarehouseOnHandModel.fromJson(Map<String, dynamic> json) {
     return WarehouseOnHandModel(
-      itemNumber: json['itemNumber'] as String? ?? '',
-      warehouseId: json['warehouseId'] as String? ?? '',
+      itemNumber: JsonString.trim(json['itemNumber']),
+      warehouseId: JsonString.trim(json['warehouseId']),
       availableSalesQuantity:
           (json['availableSalesQuantity'] as num?)?.toDouble() ?? 0,
       availableOnHandQuantity:
           (json['availableOnHandQuantity'] as num?)?.toDouble() ?? 0,
-      unit: json['unit'] as String? ?? '',
-      productName: json['productName'] as String? ?? '',
+      unit: JsonString.trim(json['unit']),
+      productName: JsonString.trim(json['productName']),
     );
   }
 

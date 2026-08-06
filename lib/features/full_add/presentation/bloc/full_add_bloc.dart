@@ -13,6 +13,7 @@ import '../../../catalog/domain/usecases/resolve_price_usecase.dart';
 import '../../../catalog/domain/usecases/submit_full_line_usecase.dart';
 import '../../../sales_orders/domain/entities/sales_order_header_entity.dart';
 import '../../domain/entities/full_cart_item_entity.dart';
+import '../../domain/full_add_qty_rules.dart';
 import 'full_add_catalog_actions.dart';
 
 part 'full_add_event.dart';

@@ -1,0 +1,208 @@
+@Tags(<String>['e2e'])
+library;
+
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:logic_retail_mobile/features/full_add/domain/full_add_qty_rules.dart';
+
+import '../helpers/fixtures.dart';
+import 'live_api_helpers.dart';
+
+void main() {
+  late LiveApiClient client;
+  Map<String, dynamic>? capturedHeader;
+
+  setUpAll(() {
+    client = LiveApiClient();
+  });
+
+  test('E2E-01 health ok=true dynamicsMode live', () async {
+    final Response<dynamic> res = await client.dio.get<dynamic>('/health');
+    expect(res.statusCode, 200);
+    final Map<String, dynamic> body = res.data as Map<String, dynamic>;
+    expect(body['ok'], isTrue);
+    expect('${body['dynamicsMode']}'.toLowerCase(), contains('live'));
+  });
+
+  test('E2E-02 login success token + companies mm/rest', () async {
+    final Response<dynamic> res = await client.loginOnce();
+    expect(res.statusCode, 200);
+    final Map<String, dynamic> data =
+        (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    expect(data['accessToken'], isA<String>());
+    expect((data['accessToken'] as String).isNotEmpty, isTrue);
+    final Map<String, dynamic> user = data['user'] as Map<String, dynamic>;
+    final List<dynamic> companies = user['companies'] as List<dynamic>;
+    final Set<String> codes = companies
+        .whereType<Map<String, dynamic>>()
+        .map((Map<String, dynamic> c) => '${c['code']}'.toLowerCase())
+        .toSet();
+    expect(codes.contains('mm'), isTrue);
+    expect(codes.contains('rest'), isTrue);
+  });
+
+  test('E2E-03 wrong password fails', () async {
+    final Response<dynamic> res = await client.loginOnce(passwordOverride: 'wrong-pass');
+    expect(res.statusCode, isNot(200));
+    final Map<String, dynamic> body = res.data as Map<String, dynamic>;
+    expect(body['success'], isFalse);
+  });
+
+  test('E2E-04 me with bearer => 1006', () async {
+    await client.loginOnce();
+    final Response<dynamic> res = await client.dio.get<dynamic>(
+      '/api/v1/auth/me',
+      options: Options(headers: client.authHeader()),
+    );
+    expect(res.statusCode, 200);
+    final Map<String, dynamic> data =
+        (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    expect('${data['personnelNumber']}', Fixtures.personnelNumber);
+  });
+
+  test('E2E-05 sales-orders?company=mm includes MM-245265', () async {
+    await client.loginOnce();
+    final Response<dynamic> res = await client.dio.get<dynamic>(
+      '/api/v1/sales-orders',
+      queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
+      options: Options(headers: client.authHeader()),
+    );
+    expect(res.statusCode, 200);
+    final List<dynamic> data =
+        (res.data as Map<String, dynamic>)['data'] as List<dynamic>;
+    final Map<String, dynamic>? header = data
+        .whereType<Map<String, dynamic>>()
+        .cast<Map<String, dynamic>?>()
+        .firstWhere(
+          (Map<String, dynamic>? o) => o?['salesId'] == Fixtures.salesId,
+          orElse: () => null,
+        );
+    expect(header, isNotNull);
+    capturedHeader = header;
+  });
+
+  test('E2E-06 get order + lines', () async {
+    await client.loginOnce();
+    final Response<dynamic> orderRes = await client.dio.get<dynamic>(
+      '/api/v1/sales-orders/${Fixtures.salesId}',
+      queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
+      options: Options(headers: client.authHeader()),
+    );
+    expect(orderRes.statusCode, 200);
+
+    final Response<dynamic> linesRes = await client.dio.get<dynamic>(
+      '/api/v1/sales-orders/${Fixtures.salesId}/lines',
+      queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
+      options: Options(headers: client.authHeader()),
+    );
+    expect(linesRes.statusCode, 200);
+    expect((linesRes.data as Map<String, dynamic>)['data'], isA<List<dynamic>>());
+  });
+
+  test('E2E-07 barcode trim equals BG410.003', () async {
+    await client.loginOnce();
+    final Response<dynamic> res = await client.dio.get<dynamic>(
+      '/api/v1/barcodes/${Fixtures.barcode}',
+      queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
+      options: Options(headers: client.authHeader()),
+    );
+    expect(res.statusCode, 200);
+    final Map<String, dynamic> data =
+        (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    expect('${data['itemNumber']}'.trim(), Fixtures.itemNumber);
+  });
+
+  test('E2E-08 pricing price>0 OR NO_PRICE', () async {
+    await client.loginOnce();
+    final Map<String, dynamic> header =
+        capturedHeader ?? Fixtures.sampleOrderHeaderJson;
+    final Response<dynamic> barcodeRes = await client.dio.get<dynamic>(
+      '/api/v1/barcodes/${Fixtures.barcode}',
+      queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
+      options: Options(headers: client.authHeader()),
+    );
+    final Map<String, dynamic> barcode =
+        (barcodeRes.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    final String unitId = '${barcode['unitId'] ?? ''}'.trim();
+
+    final Response<dynamic> res = await client.dio.get<dynamic>(
+      '/api/v1/pricing',
+      queryParameters: <String, String>{
+        'item': Fixtures.itemNumber,
+        'company': LiveApiClient.legalEntity,
+        'custAccount': '${header['custAccount']}',
+        'priceGroup': '${header['priceGroupId']}',
+        if (unitId.isNotEmpty) 'unitId': unitId,
+      },
+      options: Options(headers: client.authHeader()),
+    );
+
+    if (res.statusCode == 200) {
+      final Map<String, dynamic> data =
+          (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+      expect((data['price'] as num) > 0, isTrue);
+    } else {
+      final Map<String, dynamic> body = res.data as Map<String, dynamic>;
+      final Map<String, dynamic> error = body['error'] as Map<String, dynamic>;
+      expect('${error['code']}', 'NO_PRICE');
+    }
+  });
+
+  test('E2E-09 inventory available OR DYNAMICS_ERROR gap', () async {
+    await client.loginOnce();
+    final Map<String, dynamic> header =
+        capturedHeader ?? Fixtures.sampleOrderHeaderJson;
+    final Response<dynamic> res = await client.dio.get<dynamic>(
+      '/api/v1/inventory',
+      queryParameters: <String, String>{
+        'item': Fixtures.itemNumber,
+        'warehouse': '${header['inventLocationId']}',
+        'company': LiveApiClient.legalEntity,
+      },
+      options: Options(headers: client.authHeader()),
+    );
+
+    if (res.statusCode == 200) {
+      final Map<String, dynamic> data =
+          (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+      expect((data['availableSalesQuantity'] as num) > 0, isTrue);
+    } else {
+      final Map<String, dynamic> body = res.data as Map<String, dynamic>;
+      final Object? code = (body['error'] as Map<String, dynamic>?)?['code'];
+      expect('$code'.toUpperCase(), contains('DYNAMICS'));
+    }
+  });
+
+  test('E2E-10 FullAddQtyRules exceedsAvailable huge qty', () {
+    expect(
+      FullAddQtyRules.exceedsAvailable(quantity: 999999, availableSalesQuantity: 25),
+      isTrue,
+    );
+  });
+
+  test('E2E-11 quick POST skipped unless ENABLE_WRITE_E2E', () async {
+    if (!LiveApiClient.enableWrite) {
+      return;
+    }
+    await client.loginOnce();
+    final Response<dynamic> res = await client.dio.post<dynamic>(
+      '/api/v1/sales-orders/${Fixtures.salesId}/lines/quick',
+      data: <String, Object>{
+        'company': LiveApiClient.legalEntity,
+        'lines': <Map<String, Object>>[
+          <String, Object>{'barcode': Fixtures.barcode, 'quantity': 1},
+        ],
+      },
+      options: Options(headers: client.authHeader()),
+    );
+    expect(res.statusCode, anyOf(200, 422));
+  });
+
+  test('E2E-12 sales-orders without token => 401', () async {
+    final Response<dynamic> res = await client.dio.get<dynamic>(
+      '/api/v1/sales-orders',
+      queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
+    );
+    expect(res.statusCode, 401);
+  });
+}

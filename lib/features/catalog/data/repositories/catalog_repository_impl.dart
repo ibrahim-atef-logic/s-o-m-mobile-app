@@ -42,6 +42,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
     required String company,
     required String custAccount,
     required String priceGroup,
+    String? unitId,
   }) async {
     try {
       final PriceInfoModel model = await _remote.resolvePrice(
@@ -49,6 +50,7 @@ class CatalogRepositoryImpl implements CatalogRepository {
         company: company,
         custAccount: custAccount,
         priceGroup: priceGroup,
+        unitId: unitId,
       );
       return Right<Failure, PriceInfoEntity>(model.toEntity());
     } catch (e) {

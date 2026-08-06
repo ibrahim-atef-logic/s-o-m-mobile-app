@@ -131,11 +131,12 @@ extension _FullAddBlocAsync on FullAddBloc {
     if (state.item == null) return FullAddValidation.lookupRequired;
     if (state.price == null) return FullAddValidation.noPrice;
     if (state.onHand == null) return FullAddValidation.noStock;
-    final int? qty = int.tryParse(state.quantityText.trim());
-    if (qty == null || qty < 1) return FullAddValidation.qtyInvalid;
-    if (qty > state.onHand!.availableSalesQuantity) {
-      return FullAddValidation.qtyExceeds;
-    }
+    final String? qtyError = FullAddQtyRules.validate(
+      quantityText: state.quantityText,
+      availableSalesQuantity: state.onHand!.availableSalesQuantity,
+    );
+    if (qtyError == 'qtyInvalid') return FullAddValidation.qtyInvalid;
+    if (qtyError == 'qtyExceeds') return FullAddValidation.qtyExceeds;
     return null;
   }
 }

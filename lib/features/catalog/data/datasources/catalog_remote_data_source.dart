@@ -18,6 +18,7 @@ abstract class CatalogRemoteDataSource {
     required String company,
     required String custAccount,
     required String priceGroup,
+    String? unitId,
   });
 
   Future<WarehouseOnHandModel> getOnHand({
@@ -73,16 +74,22 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
     required String company,
     required String custAccount,
     required String priceGroup,
+    String? unitId,
   }) async {
     try {
+      final Map<String, String> query = <String, String>{
+        'item': itemNumber.trim(),
+        'company': company.trim(),
+        'custAccount': custAccount.trim(),
+        'priceGroup': priceGroup.trim(),
+      };
+      final String? unit = unitId?.trim();
+      if (unit != null && unit.isNotEmpty) {
+        query['unitId'] = unit;
+      }
       final Response<dynamic> response = await _dio.get<dynamic>(
         '/api/v1/pricing',
-        queryParameters: <String, String>{
-          'item': itemNumber,
-          'company': company,
-          'custAccount': custAccount,
-          'priceGroup': priceGroup,
-        },
+        queryParameters: query,
       );
       return PriceInfoModel.fromJson(_dataMap(response.data));
     } on DioException catch (e) {

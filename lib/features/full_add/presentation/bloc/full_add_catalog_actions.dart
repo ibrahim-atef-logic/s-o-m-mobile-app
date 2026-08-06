@@ -45,6 +45,7 @@ class FullAddCatalogActions {
       company: order.dataArea,
       custAccount: order.custAccount,
       priceGroup: order.priceGroupId,
+      unitId: item.unitId,
     );
   }
 

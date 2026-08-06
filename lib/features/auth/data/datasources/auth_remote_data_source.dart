@@ -10,6 +10,8 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
 
+  Future<UserSessionModel> me();
+
   Future<AuthResponseModel> refresh(String refreshToken);
 
   Future<void> logout(String refreshToken);
@@ -37,6 +39,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       final Map<String, dynamic> body = response.data as Map<String, dynamic>;
       return AuthResponseModel.fromJson(body['data'] as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _mapDio(e);
+    }
+  }
+
+  @override
+  Future<UserSessionModel> me() async {
+    try {
+      final Response<dynamic> response = await _dio.get<dynamic>(
+        '/api/v1/auth/me',
+      );
+      final Map<String, dynamic> body = response.data as Map<String, dynamic>;
+      return UserSessionModel.fromJson(body['data'] as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _mapDio(e);
     }

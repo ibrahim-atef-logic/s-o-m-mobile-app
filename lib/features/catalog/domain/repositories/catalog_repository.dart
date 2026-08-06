@@ -18,6 +18,7 @@ abstract class CatalogRepository {
     required String company,
     required String custAccount,
     required String priceGroup,
+    String? unitId,
   });
 
   Future<Either<Failure, WarehouseOnHandEntity>> getOnHand({

@@ -34,6 +34,21 @@ flutter build ipa --release --obfuscate --split-debug-info=build/debug-info \
   --dart-define=ENV=prod --dart-define=API_BASE_URL=https://salesorderapp.logictec.online
 ```
 
+## Tests
+
+```bash
+# Unit + widget (skip live network)
+flutter test --exclude-tags e2e
+
+# Live e2e smoke against salesorderapp
+flutter test --tags e2e --dart-define=API_BASE_URL=https://salesorderapp.logictec.online
+
+# Everything
+flutter test
+```
+
+See `test/README.md` for e2e dart-define overrides (`E2E_*`, `ENABLE_WRITE_E2E`).
+
 ## Config location
 
 `lib/core/constants/app_constants.dart` → `AppConstants.apiBaseUrl` / `apiBaseUrlNormalized`

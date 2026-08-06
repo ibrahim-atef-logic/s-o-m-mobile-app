@@ -1,3 +1,4 @@
+import '../../../../core/utils/json_string.dart';
 import '../../domain/entities/line_item_result_entity.dart';
 
 class LineItemResultModel {
@@ -27,15 +28,15 @@ class LineItemResultModel {
 
   factory LineItemResultModel.fromJson(Map<String, dynamic> json) {
     return LineItemResultModel(
-      id: json['id'] as String? ?? '',
-      barcode: json['barcode'] as String?,
-      itemNumber: json['itemNumber'] as String?,
+      id: JsonString.trim(json['id']),
+      barcode: JsonString.trimOrNull(json['barcode']),
+      itemNumber: JsonString.trimOrNull(json['itemNumber']),
       quantity: json['quantity'] as num? ?? 0,
-      status: json['status'] as String? ?? '',
+      status: JsonString.trim(json['status']),
       commentAr: json['commentAr'] as String?,
       commentEn: json['commentEn'] as String?,
       price: (json['price'] as num?)?.toDouble(),
-      unitId: json['unitId'] as String?,
+      unitId: JsonString.trimOrNull(json['unitId']),
       availableQty: (json['availableQty'] as num?)?.toDouble(),
     );
   }

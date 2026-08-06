@@ -14,6 +14,7 @@ class ResolvePriceUseCase {
     required String company,
     required String custAccount,
     required String priceGroup,
+    String? unitId,
   }) {
     if (itemNumber.trim().isEmpty || company.trim().isEmpty) {
       return Future<Either<Failure, PriceInfoEntity>>.value(
@@ -23,10 +24,11 @@ class ResolvePriceUseCase {
       );
     }
     return _repository.resolvePrice(
-      itemNumber: itemNumber,
-      company: company,
-      custAccount: custAccount,
-      priceGroup: priceGroup,
+      itemNumber: itemNumber.trim(),
+      company: company.trim(),
+      custAccount: custAccount.trim(),
+      priceGroup: priceGroup.trim(),
+      unitId: unitId?.trim(),
     );
   }
 }

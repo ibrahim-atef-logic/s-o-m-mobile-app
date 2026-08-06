@@ -99,6 +99,7 @@ void main() {
           company: any(named: 'company'),
           custAccount: any(named: 'custAccount'),
           priceGroup: any(named: 'priceGroup'),
+          unitId: any(named: 'unitId'),
         ),
       ).thenAnswer((_) async => const Right<Failure, PriceInfoEntity>(price));
       return buildBloc();
