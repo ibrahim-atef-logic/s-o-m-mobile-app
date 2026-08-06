@@ -112,7 +112,21 @@ void main() {
     expect('${data['itemNumber']}'.trim(), Fixtures.itemNumber);
   });
 
-  test('E2E-08 pricing price>0 OR NO_PRICE', () async {
+  test('E2E-07b unknown barcode => BARCODE_NOT_FOUND', () async {
+    await client.loginOnce();
+    final Response<dynamic> res = await client.dio.get<dynamic>(
+      '/api/v1/barcodes/${Fixtures.unknownBarcode}',
+      queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
+      options: Options(headers: client.authHeader()),
+    );
+    expect(res.statusCode, 404);
+    final Map<String, dynamic> body = res.data as Map<String, dynamic>;
+    expect(body['success'], isFalse);
+    final Map<String, dynamic> error = body['error'] as Map<String, dynamic>;
+    expect('${error['code']}', 'BARCODE_NOT_FOUND');
+  });
+
+  test('E2E-08 pricing returns price 50 for fixture', () async {
     await client.loginOnce();
     final Map<String, dynamic> header =
         capturedHeader ?? Fixtures.sampleOrderHeaderJson;
@@ -137,18 +151,14 @@ void main() {
       options: Options(headers: client.authHeader()),
     );
 
-    if (res.statusCode == 200) {
-      final Map<String, dynamic> data =
-          (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
-      expect((data['price'] as num) > 0, isTrue);
-    } else {
-      final Map<String, dynamic> body = res.data as Map<String, dynamic>;
-      final Map<String, dynamic> error = body['error'] as Map<String, dynamic>;
-      expect('${error['code']}', 'NO_PRICE');
-    }
+    expect(res.statusCode, 200);
+    final Map<String, dynamic> data =
+        (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    expect('${data['itemNumber']}'.trim(), Fixtures.itemNumber);
+    expect((data['price'] as num).toDouble(), 50);
   });
 
-  test('E2E-09 inventory available OR DYNAMICS_ERROR gap', () async {
+  test('E2E-09 inventory available for MMS000WH', () async {
     await client.loginOnce();
     final Map<String, dynamic> header =
         capturedHeader ?? Fixtures.sampleOrderHeaderJson;
@@ -162,20 +172,20 @@ void main() {
       options: Options(headers: client.authHeader()),
     );
 
-    if (res.statusCode == 200) {
-      final Map<String, dynamic> data =
-          (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
-      expect((data['availableSalesQuantity'] as num) > 0, isTrue);
-    } else {
-      final Map<String, dynamic> body = res.data as Map<String, dynamic>;
-      final Object? code = (body['error'] as Map<String, dynamic>?)?['code'];
-      expect('$code'.toUpperCase(), contains('DYNAMICS'));
-    }
+    expect(res.statusCode, 200);
+    final Map<String, dynamic> data =
+        (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+    expect('${data['warehouseId']}'.trim(), Fixtures.warehouse);
+    expect((data['availableSalesQuantity'] as num) > 0, isTrue);
+    expect((data['availableOnHandQuantity'] as num) > 0, isTrue);
   });
 
   test('E2E-10 FullAddQtyRules exceedsAvailable huge qty', () {
     expect(
-      FullAddQtyRules.exceedsAvailable(quantity: 999999, availableSalesQuantity: 25),
+      FullAddQtyRules.exceedsAvailable(
+        quantity: 999999,
+        availableSalesQuantity: 24874,
+      ),
       isTrue,
     );
   });

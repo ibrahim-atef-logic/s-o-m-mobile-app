@@ -10,6 +10,7 @@ abstract final class Fixtures {
   static const String salesId = 'MM-245265';
   static const String warehouse = 'MMS000WH';
   static const String custAccount = '20-10004';
+  static const String unknownBarcode = '0000000000000';
 
   static const Map<String, dynamic> sampleBarcodeJson = <String, dynamic>{
     'barcode': barcode,
