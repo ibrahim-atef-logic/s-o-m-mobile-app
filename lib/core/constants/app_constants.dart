@@ -1,9 +1,21 @@
 /// App-wide API and storage keys.
 abstract final class AppConstants {
+  /// Live Sales Order API. Override with `--dart-define=API_BASE_URL=...`.
+  /// Do not use localhost, hr-admin, or hrapp — those are other products.
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:3000',
+    defaultValue: 'https://salesorderapp.logictec.online',
   );
+
+  /// Normalized base (no trailing slash) for path joining.
+  static String get apiBaseUrlNormalized {
+    final String url = apiBaseUrl.trim();
+    if (url.endsWith('/')) {
+      return url.substring(0, url.length - 1);
+    }
+    return url;
+  }
+
   static const Duration connectTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);
 }

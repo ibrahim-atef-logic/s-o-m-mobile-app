@@ -13,7 +13,7 @@ Dio createDio({
 }) {
   final Dio dio = Dio(
     BaseOptions(
-      baseUrl: AppConstants.apiBaseUrl,
+      baseUrl: AppConstants.apiBaseUrlNormalized,
       connectTimeout: AppConstants.connectTimeout,
       receiveTimeout: AppConstants.receiveTimeout,
       headers: <String, Object?>{'Content-Type': 'application/json'},
