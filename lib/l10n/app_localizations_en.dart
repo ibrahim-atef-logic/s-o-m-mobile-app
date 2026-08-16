@@ -108,10 +108,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectCustomer => 'Select customer';
 
   @override
-  String get searchCustomers => 'Search by account or name';
+  String get searchCustomers => 'Search by full account number';
 
   @override
-  String get noCustomers => 'No customers match this search';
+  String get noCustomers => 'No customer found. Enter the full account number.';
 
   @override
   String get errorCustomersLoadFailed =>

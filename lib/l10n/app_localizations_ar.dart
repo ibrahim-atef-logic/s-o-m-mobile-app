@@ -107,10 +107,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectCustomer => 'اختر العميل';
 
   @override
-  String get searchCustomers => 'بحث برقم الحساب أو الاسم';
+  String get searchCustomers => 'ابحث برقم الحساب بالكامل';
 
   @override
-  String get noCustomers => 'لا يوجد عملاء مطابقون للبحث';
+  String get noCustomers => 'لا يوجد عميل مطابق. اكتب رقم الحساب بالكامل.';
 
   @override
   String get errorCustomersLoadFailed => 'تعذر تحميل العملاء، حاول مرة أخرى';

@@ -39,8 +39,8 @@
     }
   },
   "selectCustomer": "Select customer",
-  "searchCustomers": "Search by account or name",
-  "noCustomers": "No customers match this search",
+  "searchCustomers": "Search by full account number",
+  "noCustomers": "No customer found. Enter the full account number.",
   "errorCustomersLoadFailed": "Could not load customers, please try again",
   "errorCustomerRequired": "Select a customer first",
   "noOrders": "No open sales orders",

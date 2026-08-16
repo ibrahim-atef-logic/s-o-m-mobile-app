@@ -275,13 +275,13 @@ abstract class AppLocalizations {
   /// No description provided for @searchCustomers.
   ///
   /// In en, this message translates to:
-  /// **'Search by account or name'**
+  /// **'Search by full account number'**
   String get searchCustomers;
 
   /// No description provided for @noCustomers.
   ///
   /// In en, this message translates to:
-  /// **'No customers match this search'**
+  /// **'No customer found. Enter the full account number.'**
   String get noCustomers;
 
   /// No description provided for @errorCustomersLoadFailed.

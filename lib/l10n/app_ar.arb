@@ -39,8 +39,8 @@
     }
   },
   "selectCustomer": "اختر العميل",
-  "searchCustomers": "بحث برقم الحساب أو الاسم",
-  "noCustomers": "لا يوجد عملاء مطابقون للبحث",
+  "searchCustomers": "ابحث برقم الحساب بالكامل",
+  "noCustomers": "لا يوجد عميل مطابق. اكتب رقم الحساب بالكامل.",
   "errorCustomersLoadFailed": "تعذر تحميل العملاء، حاول مرة أخرى",
   "errorCustomerRequired": "اختر العميل أولاً",
   "noOrders": "لا توجد أوامر مفتوحة",
