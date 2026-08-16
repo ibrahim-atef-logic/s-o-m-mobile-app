@@ -24,21 +24,21 @@ void main() {
     expect('${body['dynamicsMode']}'.toLowerCase(), contains('live'));
   });
 
-  test('E2E-02 login success token + companies mm/rest', () async {
+  test('E2E-02 login success caches activation user (activeCompany=mm)', () async {
     final Response<dynamic> res = await client.loginOnce();
     expect(res.statusCode, 200);
     final Map<String, dynamic> data =
         (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
     expect(data['accessToken'], isA<String>());
+    expect(data['refreshToken'], isA<String>());
     expect((data['accessToken'] as String).isNotEmpty, isTrue);
     final Map<String, dynamic> user = data['user'] as Map<String, dynamic>;
-    final List<dynamic> companies = user['companies'] as List<dynamic>;
-    final Set<String> codes = companies
-        .whereType<Map<String, dynamic>>()
-        .map((Map<String, dynamic> c) => '${c['code']}'.toLowerCase())
-        .toSet();
-    expect(codes.contains('mm'), isTrue);
-    expect(codes.contains('rest'), isTrue);
+    expect('${user['personnelNumber']}', Fixtures.personnelNumber);
+    expect('${user['activeCompany']}'.toLowerCase(), 'mm');
+    expect('${user['activeWarehouse']}', Fixtures.warehouse);
+    expect('${user['defaultCustAccount']}', '10-10002');
+    expect('${user['retailChannelId']}', '912');
+    expect('${user['currency']}', 'SAR');
   });
 
   test('E2E-03 wrong password fails', () async {

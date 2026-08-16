@@ -8,7 +8,7 @@ extension FailureL10n on Failure {
     return switch (this) {
       NetworkFailure() => l10n.errorNetwork,
       AuthFailure(:final String message) => _authTitle(l10n, message),
-      ValidationFailure() => l10n.errorValidation,
+      ValidationFailure(:final String message) => _validationTitle(l10n, message),
       CacheFailure() => l10n.errorCache,
       ServerFailure(:final String message) => _serverTitle(l10n, message),
     };
@@ -45,6 +45,9 @@ extension FailureL10n on Failure {
 
   static String _authTitle(AppLocalizations l10n, String message) {
     final String lower = message.toLowerCase();
+    if (lower.contains('account_disabled')) {
+      return l10n.errorAccountDisabled;
+    }
     if (lower.contains('auth_company_unknown') ||
         lower.contains('not registered') ||
         (lower.contains('company') &&
@@ -68,12 +71,29 @@ extension FailureL10n on Failure {
       'Cache error',
       'Validation error',
       'Authentication failed',
+      'WAREHOUSE_NOT_ASSIGNED',
     };
     return placeholders.contains(raw);
   }
 
+  static String _validationTitle(AppLocalizations l10n, String message) {
+    final String lower = message.toLowerCase();
+    if (lower.contains('warehouse_not_assigned') ||
+        lower.contains('warehouse are required')) {
+      return l10n.errorWarehouseNotAssigned;
+    }
+    return l10n.errorValidation;
+  }
+
   static String _serverTitle(AppLocalizations l10n, String message) {
     final String lower = message.toLowerCase();
+    if (lower.contains('password_change_failed')) {
+      return l10n.errorPasswordChangeFailed;
+    }
+    if (lower.contains('warehouse_not_assigned') ||
+        lower.contains('warehouse are required')) {
+      return l10n.errorWarehouseNotAssigned;
+    }
     if (lower.contains('503') ||
         lower.contains('unavailable') ||
         lower.contains('dynamics')) {

@@ -47,10 +47,14 @@ class _QuickAddScanPageState extends State<QuickAddScanPage> {
         listenWhen: (QuickAddState p, QuickAddState c) =>
             c.lineAdded ||
             c.barcode != p.barcode ||
+            c.quantityText != p.quantityText ||
             (c.failure != null && c.failure != p.failure),
         listener: (BuildContext context, QuickAddState state) {
           if (state.barcode != _barcodeCtrl.text) {
             _barcodeCtrl.text = state.barcode;
+          }
+          if (state.quantityText != _qtyCtrl.text) {
+            _qtyCtrl.text = state.quantityText;
           }
           if (state.lineAdded) {
             showAppSnackBar(
@@ -59,7 +63,7 @@ class _QuickAddScanPageState extends State<QuickAddScanPage> {
               type: AppSnackBarType.success,
             );
             _barcodeCtrl.clear();
-            _qtyCtrl.clear();
+            _qtyCtrl.text = '1';
             context.read<QuickAddBloc>().add(const QuickAddMessageCleared());
             context.pop();
             return;

@@ -85,7 +85,7 @@ void main() {
   });
 
   blocTest<FullAddBloc, FullAddState>(
-    'lookup success then resolves price',
+    'lookup success then resolves price and on-hand',
     build: () {
       when(
         () => lookup(
@@ -102,6 +102,15 @@ void main() {
           unitId: any(named: 'unitId'),
         ),
       ).thenAnswer((_) async => const Right<Failure, PriceInfoEntity>(price));
+      when(
+        () => getOnHand(
+          itemNumber: any(named: 'itemNumber'),
+          warehouse: any(named: 'warehouse'),
+          company: any(named: 'company'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, WarehouseOnHandEntity>(onHand),
+      );
       return buildBloc();
     },
     act: (FullAddBloc bloc) async {
@@ -117,6 +126,12 @@ void main() {
       ),
       isA<FullAddState>().having((FullAddState s) => s.item, 'item', item),
       isA<FullAddState>().having((FullAddState s) => s.price, 'price', price),
+      isA<FullAddState>().having(
+        (FullAddState s) => s.fetchingQty,
+        'fetchingQty',
+        true,
+      ),
+      isA<FullAddState>().having((FullAddState s) => s.onHand, 'onHand', onHand),
     ],
   );
 

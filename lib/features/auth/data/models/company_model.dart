@@ -1,3 +1,4 @@
+import '../../../../core/utils/json_map.dart';
 import '../../domain/entities/company_entity.dart';
 
 class CompanyModel {
@@ -12,10 +13,12 @@ class CompanyModel {
   final String groupId;
 
   factory CompanyModel.fromJson(Map<String, dynamic> json) {
+    final String code = JsonMap.string(json, 'code');
+    final String name = JsonMap.string(json, 'name');
     return CompanyModel(
-      code: json['code'] as String,
-      name: json['name'] as String,
-      groupId: json['groupId'] as String? ?? '',
+      code: code,
+      name: name.isEmpty ? code : name,
+      groupId: JsonMap.string(json, 'groupId'),
     );
   }
 

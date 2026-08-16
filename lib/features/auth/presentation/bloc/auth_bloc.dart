@@ -6,6 +6,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/auth_tokens_entity.dart';
 import '../../domain/entities/company_entity.dart';
 import '../../domain/entities/user_session_entity.dart';
+import '../../domain/usecases/fetch_me_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
 import '../../domain/usecases/restore_session_usecase.dart';
@@ -21,21 +22,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required LogoutUseCase logoutUseCase,
     required RestoreSessionUseCase restoreSessionUseCase,
     required SelectCompanyUseCase selectCompanyUseCase,
+    required FetchMeUseCase fetchMeUseCase,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
        _restoreSessionUseCase = restoreSessionUseCase,
        _selectCompanyUseCase = selectCompanyUseCase,
+       _fetchMeUseCase = fetchMeUseCase,
        super(const AuthInitial()) {
     on<AuthStarted>(_onStarted);
     on<AuthLoginSubmitted>(_onLogin);
     on<AuthCompanySelected>(_onCompanySelected);
     on<AuthLogoutRequested>(_onLogout);
+    on<AuthSessionExpired>(_onSessionExpired);
+    on<AuthProfileOpened>(_onProfileOpened);
   }
 
   final LoginUseCase _loginUseCase;
   final LogoutUseCase _logoutUseCase;
   final RestoreSessionUseCase _restoreSessionUseCase;
   final SelectCompanyUseCase _selectCompanyUseCase;
+  final FetchMeUseCase _fetchMeUseCase;
 
   Future<void> _onStarted(AuthStarted event, Emitter<AuthState> emit) async {
     emit(const AuthLoading());
@@ -48,9 +54,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(const AuthUnauthenticated());
         return;
       }
-      emit(
-        AuthAuthenticated(_withDefaultCompany(session)),
-      );
+      emit(AuthAuthenticated(_withDefaultCompany(session)));
     });
   }
 
@@ -64,18 +68,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       personnelNumber: event.personnelNumber,
       password: event.password,
     );
-    result.fold((Failure f) => emit(AuthFailureState(f)), (
-      AuthTokensEntity tokens,
-    ) {
-      emit(
-        AuthAuthenticated(
-          _withDefaultCompany(
-            tokens.user,
-            preferredCode: event.company,
-          ),
-        ),
-      );
-    });
+    result.fold(
+      (Failure f) => emit(AuthFailureState(f)),
+      (AuthTokensEntity tokens) => emit(
+        AuthAuthenticated(_withDefaultCompany(tokens.user)),
+      ),
+    );
   }
 
   Future<void> _onCompanySelected(
@@ -105,20 +103,43 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthUnauthenticated());
   }
 
-  UserSessionEntity _withDefaultCompany(
-    UserSessionEntity session, {
-    String? preferredCode,
-  }) {
+  Future<void> _onSessionExpired(
+    AuthSessionExpired event,
+    Emitter<AuthState> emit,
+  ) async {
+    await _logoutUseCase();
+    emit(const AuthUnauthenticated());
+  }
+
+  Future<void> _onProfileOpened(
+    AuthProfileOpened event,
+    Emitter<AuthState> emit,
+  ) async {
+    final AuthState current = state;
+    if (current is! AuthAuthenticated) return;
+    final Either<Failure, UserSessionEntity> result = await _fetchMeUseCase();
+    result.fold((_) {}, (UserSessionEntity me) {
+      emit(
+        AuthAuthenticated(
+          _withDefaultCompany(
+            me.copyWith(selectedCompany: current.session.selectedCompany),
+          ),
+        ),
+      );
+    });
+  }
+
+  UserSessionEntity _withDefaultCompany(UserSessionEntity session) {
+    final String operating = session.operatingCompany;
+    if (operating.isNotEmpty) {
+      final CompanyEntity? match = session.companyByCode(operating);
+      return session.copyWith(
+        selectedCompany: match ??
+            CompanyEntity(code: operating, name: operating, groupId: ''),
+      );
+    }
     if (session.selectedCompany != null) {
       return session;
-    }
-    final String? preferred = preferredCode?.trim();
-    if (preferred != null && preferred.isNotEmpty) {
-      for (final CompanyEntity company in session.companies) {
-        if (company.code.toLowerCase() == preferred.toLowerCase()) {
-          return session.copyWith(selectedCompany: company);
-        }
-      }
     }
     if (session.companies.isEmpty) {
       return session;

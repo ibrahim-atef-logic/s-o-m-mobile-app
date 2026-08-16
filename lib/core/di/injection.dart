@@ -9,11 +9,14 @@ import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
+import '../../features/auth/domain/usecases/change_password_usecase.dart';
+import '../../features/auth/domain/usecases/fetch_me_usecase.dart';
 import '../../features/auth/domain/usecases/login_usecase.dart';
 import '../../features/auth/domain/usecases/logout_usecase.dart';
 import '../../features/auth/domain/usecases/restore_session_usecase.dart';
 import '../../features/auth/domain/usecases/select_company_usecase.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/cubit/change_password_cubit.dart';
 import '../../features/catalog/data/datasources/catalog_remote_data_source.dart';
 import '../../features/catalog/data/repositories/catalog_repository_impl.dart';
 import '../../features/catalog/domain/repositories/catalog_repository.dart';
@@ -34,6 +37,7 @@ import '../../features/sales_orders/domain/usecases/get_my_sales_orders_usecase.
 import '../../features/sales_orders/domain/usecases/get_sales_order_lines_usecase.dart';
 import '../../features/sales_orders/presentation/bloc/sales_orders_bloc.dart';
 import '../../features/so_lines/presentation/cubit/so_lines_cubit.dart';
+import '../auth/auth_session_controller.dart';
 import '../constants/app_constants.dart';
 import '../locale/locale_cubit.dart';
 import '../locale/locale_repository.dart';
@@ -51,6 +55,7 @@ Future<void> configureDependencies() async {
     ..registerSingleton<FlutterSecureStorage>(secureStorage)
     ..registerLazySingleton<LocaleRepository>(() => LocaleRepository(sl()))
     ..registerLazySingleton<LocaleCubit>(() => LocaleCubit(sl()))
+    ..registerLazySingleton<AuthSessionController>(AuthSessionController.new)
     ..registerLazySingleton<AuthLocalDataSource>(
       () => AuthLocalDataSourceImpl(secureStorage: sl(), prefs: sl()),
     );
@@ -76,14 +81,18 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton(() => LogoutUseCase(sl()))
     ..registerLazySingleton(() => RestoreSessionUseCase(sl()))
     ..registerLazySingleton(() => SelectCompanyUseCase(sl()))
+    ..registerLazySingleton(() => FetchMeUseCase(sl()))
+    ..registerLazySingleton(() => ChangePasswordUseCase(sl()))
     ..registerFactory(
       () => AuthBloc(
         loginUseCase: sl(),
         logoutUseCase: sl(),
         restoreSessionUseCase: sl(),
         selectCompanyUseCase: sl(),
+        fetchMeUseCase: sl(),
       ),
     )
+    ..registerFactory(() => ChangePasswordCubit(sl()))
     ..registerLazySingleton<SalesOrdersRemoteDataSource>(
       () => SalesOrdersRemoteDataSourceImpl(sl()),
     )
@@ -130,6 +139,7 @@ Future<void> configureDependencies() async {
       },
       onRefreshFailed: () {
         sl<AuthLocalDataSource>().clear();
+        sl<AuthSessionController>().notifyExpired();
       },
       dio: dio,
     ),

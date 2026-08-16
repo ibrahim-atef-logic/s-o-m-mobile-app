@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:logger/logger.dart';
 
+import 'core/auth/auth_session_controller.dart';
 import 'core/di/injection.dart';
 import 'core/locale/locale_cubit.dart';
 import 'core/router/app_router.dart';
@@ -23,6 +24,9 @@ Future<void> main() async {
       };
       await configureDependencies();
       final AuthBloc authBloc = sl<AuthBloc>()..add(const AuthStarted());
+      sl<AuthSessionController>().onExpired = () {
+        authBloc.add(const AuthSessionExpired());
+      };
       runApp(
         LogicRetailApp(authBloc: authBloc, localeCubit: sl<LocaleCubit>()),
       );

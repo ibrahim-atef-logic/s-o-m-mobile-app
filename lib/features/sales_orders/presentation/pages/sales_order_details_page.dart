@@ -79,15 +79,6 @@ class SalesOrderDetailsPage extends StatelessWidget {
                   extra: order,
                 ),
               ),
-              _ActionTile(
-                icon: Icons.error_outline,
-                title: l10n.failedLines,
-                description: l10n.failedLinesDesc,
-                onTap: () => context.push(
-                  '/orders/${order.salesId}/failed-lines'
-                  '?company=${order.dataArea}',
-                ),
-              ),
             ],
           ),
         ],

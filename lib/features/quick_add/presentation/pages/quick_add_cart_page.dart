@@ -26,23 +26,6 @@ class QuickAddCartPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.quickAdd),
-        actions: <Widget>[
-          Semantics(
-            label: l10n.failedLines,
-            button: true,
-            child: IconButton(
-              tooltip: l10n.failedLines,
-              onPressed: () {
-                final QuickAddState state = context.read<QuickAddBloc>().state;
-                context.push(
-                  '/orders/${state.order.salesId}/failed-lines'
-                  '?company=${state.order.dataArea}&mode=quick',
-                );
-              },
-              icon: const Icon(Icons.error_outline),
-            ),
-          ),
-        ],
       ),
       body: BlocConsumer<QuickAddBloc, QuickAddState>(
         listenWhen: (QuickAddState p, QuickAddState c) =>

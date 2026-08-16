@@ -40,6 +40,13 @@ class AuthInterceptor extends Interceptor {
       handler.next(err);
       return;
     }
+    final String path = err.requestOptions.path;
+    if (path.contains('/auth/login') ||
+        path.contains('/auth/refresh') ||
+        path.contains('/auth/logout')) {
+      handler.next(err);
+      return;
+    }
 
     try {
       if (_refreshing) {

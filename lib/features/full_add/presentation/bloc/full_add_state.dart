@@ -18,7 +18,7 @@ class FullAddState extends Equatable {
     this.item,
     this.price,
     this.onHand,
-    this.quantityText = '',
+    this.quantityText = '1',
     this.lookingUp = false,
     this.fetchingQty = false,
     this.submitting = false,

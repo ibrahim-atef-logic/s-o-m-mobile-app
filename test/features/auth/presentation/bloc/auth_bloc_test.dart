@@ -5,6 +5,7 @@ import 'package:logic_retail_mobile/core/error/failures.dart';
 import 'package:logic_retail_mobile/features/auth/domain/entities/auth_tokens_entity.dart';
 import 'package:logic_retail_mobile/features/auth/domain/entities/company_entity.dart';
 import 'package:logic_retail_mobile/features/auth/domain/entities/user_session_entity.dart';
+import 'package:logic_retail_mobile/features/auth/domain/usecases/fetch_me_usecase.dart';
 import 'package:logic_retail_mobile/features/auth/domain/usecases/login_usecase.dart';
 import 'package:logic_retail_mobile/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:logic_retail_mobile/features/auth/domain/usecases/restore_session_usecase.dart';
@@ -20,11 +21,14 @@ class MockRestoreSessionUseCase extends Mock implements RestoreSessionUseCase {}
 
 class MockSelectCompanyUseCase extends Mock implements SelectCompanyUseCase {}
 
+class MockFetchMeUseCase extends Mock implements FetchMeUseCase {}
+
 void main() {
   late MockLoginUseCase login;
   late MockLogoutUseCase logout;
   late MockRestoreSessionUseCase restore;
   late MockSelectCompanyUseCase selectCompany;
+  late MockFetchMeUseCase fetchMe;
 
   const CompanyEntity usmf = CompanyEntity(
     code: 'usmf',
@@ -54,6 +58,7 @@ void main() {
     logout = MockLogoutUseCase();
     restore = MockRestoreSessionUseCase();
     selectCompany = MockSelectCompanyUseCase();
+    fetchMe = MockFetchMeUseCase();
   });
 
   AuthBloc buildBloc() => AuthBloc(
@@ -61,6 +66,7 @@ void main() {
     logoutUseCase: logout,
     restoreSessionUseCase: restore,
     selectCompanyUseCase: selectCompany,
+    fetchMeUseCase: fetchMe,
   );
 
   blocTest<AuthBloc, AuthState>(
@@ -207,6 +213,63 @@ void main() {
       const AuthLoading(),
       AuthAuthenticated(singleCompanyUser.copyWith(selectedCompany: usmf)),
     ],
+  );
+
+  blocTest<AuthBloc, AuthState>(
+    'login with logic-trial uses activeCompany mm not registry key',
+    build: () {
+      const CompanyEntity mm = CompanyEntity(
+        code: 'mm',
+        name: 'mm',
+        groupId: '',
+      );
+      const UserSessionEntity activationUser = UserSessionEntity(
+        personnelNumber: '1006',
+        workerRecId: 5637227826,
+        name: 'محمد عفيف',
+        companies: <CompanyEntity>[mm],
+        userId: 'm.afif',
+        company: 'mm',
+        activeCompany: 'mm',
+        activeWarehouse: 'MMS000WH',
+        defaultCustAccount: '10-10002',
+        retailChannelId: '912',
+        currency: 'SAR',
+        needsWarehouseSelection: false,
+      );
+      when(
+        () => login(
+          company: any(named: 'company'),
+          personnelNumber: any(named: 'personnelNumber'),
+          password: any(named: 'password'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, AuthTokensEntity>(
+          AuthTokensEntity(
+            accessToken: 'a',
+            refreshToken: 'r',
+            user: activationUser,
+          ),
+        ),
+      );
+      return buildBloc();
+    },
+    act: (AuthBloc bloc) => bloc.add(
+      const AuthLoginSubmitted(
+        company: 'logic-trial',
+        personnelNumber: '1006',
+        password: '123',
+      ),
+    ),
+    verify: (AuthBloc bloc) {
+      final AuthState state = bloc.state;
+      expect(state, isA<AuthAuthenticated>());
+      final UserSessionEntity session = (state as AuthAuthenticated).session;
+      expect(session.operatingCompany, 'mm');
+      expect(session.selectedCompany?.code, 'mm');
+      expect(session.activeWarehouse, 'MMS000WH');
+      expect(session.defaultCustAccount, '10-10002');
+    },
   );
 
   blocTest<AuthBloc, AuthState>(

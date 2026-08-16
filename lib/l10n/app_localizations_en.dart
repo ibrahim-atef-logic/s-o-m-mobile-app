@@ -34,7 +34,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get personnelNumber => 'Personnel number';
 
   @override
-  String get personnelNumberHint => 'Enter your employee number';
+  String get personnelNumberHint => 'Employee number or user id';
 
   @override
   String get password => 'Password';
@@ -43,13 +43,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordHint => 'Enter your password';
 
   @override
-  String get companyCode => 'Company';
+  String get companyCode => 'Environment / tenant code';
 
   @override
-  String get companyCodeHint => 'Dynamics company code (e.g. usmf)';
+  String get companyCodeHint => 'Environment / tenant code';
 
   @override
-  String get errorCompanyRequired => 'Company is required';
+  String get errorCompanyRequired => 'Environment code is required';
 
   @override
   String get showPassword => 'Show password';
@@ -321,10 +321,71 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorAuth => 'Invalid credentials';
 
   @override
-  String get errorAuthCompanyUnknown => 'Company is not registered';
+  String get errorAuthCompanyUnknown => 'Environment code is not registered';
 
   @override
   String get errorAuthCredentials => 'Invalid personnel number or password';
+
+  @override
+  String get errorAccountDisabled => 'Account is inactive in D365 / mobile';
+
+  @override
+  String get errorPasswordChangeFailed => 'Password could not be changed';
+
+  @override
+  String get errorWarehouseNotAssigned =>
+      'No warehouse assigned / لم يتم تعيين مستودع';
+
+  @override
+  String get profileTitle => 'Profile';
+
+  @override
+  String get profileName => 'Name';
+
+  @override
+  String get profileUserId => 'User ID';
+
+  @override
+  String get profileActiveCompany => 'Company';
+
+  @override
+  String get profileDefaultWarehouse => 'Default warehouse';
+
+  @override
+  String get profileChannel => 'Branch';
+
+  @override
+  String get profileCurrency => 'Currency';
+
+  @override
+  String get profileDefaultCustomer => 'Default customer';
+
+  @override
+  String get warehouseNotAssignedBanner =>
+      'Warehouse is not assigned / لم يتم تعيين مستودع. Warehouse picker is not available yet / اختيار المستودع غير متاح حالياً.';
+
+  @override
+  String get changePassword => 'Change password';
+
+  @override
+  String get oldPassword => 'Current password';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get confirmPassword => 'Confirm new password';
+
+  @override
+  String get errorPasswordMismatch =>
+      'New password and confirmation do not match';
+
+  @override
+  String get errorPasswordSameAsOld =>
+      'New password must be different from the current one';
+
+  @override
+  String get passwordChanged => 'Password changed';
 
   @override
   String get errorTimeout => 'Request timed out';

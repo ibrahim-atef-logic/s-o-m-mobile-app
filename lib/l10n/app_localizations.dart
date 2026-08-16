@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @personnelNumberHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter your employee number'**
+  /// **'Employee number or user id'**
   String get personnelNumberHint;
 
   /// No description provided for @password.
@@ -167,19 +167,19 @@ abstract class AppLocalizations {
   /// No description provided for @companyCode.
   ///
   /// In en, this message translates to:
-  /// **'Company'**
+  /// **'Environment / tenant code'**
   String get companyCode;
 
   /// No description provided for @companyCodeHint.
   ///
   /// In en, this message translates to:
-  /// **'Dynamics company code (e.g. usmf)'**
+  /// **'Environment / tenant code'**
   String get companyCodeHint;
 
   /// No description provided for @errorCompanyRequired.
   ///
   /// In en, this message translates to:
-  /// **'Company is required'**
+  /// **'Environment code is required'**
   String get errorCompanyRequired;
 
   /// No description provided for @showPassword.
@@ -629,7 +629,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorAuthCompanyUnknown.
   ///
   /// In en, this message translates to:
-  /// **'Company is not registered'**
+  /// **'Environment code is not registered'**
   String get errorAuthCompanyUnknown;
 
   /// No description provided for @errorAuthCredentials.
@@ -637,6 +637,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid personnel number or password'**
   String get errorAuthCredentials;
+
+  /// No description provided for @errorAccountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Account is inactive in D365 / mobile'**
+  String get errorAccountDisabled;
+
+  /// No description provided for @errorPasswordChangeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Password could not be changed'**
+  String get errorPasswordChangeFailed;
+
+  /// No description provided for @errorWarehouseNotAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'No warehouse assigned / لم يتم تعيين مستودع'**
+  String get errorWarehouseNotAssigned;
+
+  /// No description provided for @profileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileTitle;
+
+  /// No description provided for @profileName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get profileName;
+
+  /// No description provided for @profileUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get profileUserId;
+
+  /// No description provided for @profileActiveCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'Company'**
+  String get profileActiveCompany;
+
+  /// No description provided for @profileDefaultWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Default warehouse'**
+  String get profileDefaultWarehouse;
+
+  /// No description provided for @profileChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Branch'**
+  String get profileChannel;
+
+  /// No description provided for @profileCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Currency'**
+  String get profileCurrency;
+
+  /// No description provided for @profileDefaultCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Default customer'**
+  String get profileDefaultCustomer;
+
+  /// No description provided for @warehouseNotAssignedBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse is not assigned / لم يتم تعيين مستودع. Warehouse picker is not available yet / اختيار المستودع غير متاح حالياً.'**
+  String get warehouseNotAssignedBanner;
+
+  /// No description provided for @changePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get changePassword;
+
+  /// No description provided for @oldPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get oldPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPassword;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get confirmPassword;
+
+  /// No description provided for @errorPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'New password and confirmation do not match'**
+  String get errorPasswordMismatch;
+
+  /// No description provided for @errorPasswordSameAsOld.
+  ///
+  /// In en, this message translates to:
+  /// **'New password must be different from the current one'**
+  String get errorPasswordSameAsOld;
+
+  /// No description provided for @passwordChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed'**
+  String get passwordChanged;
 
   /// No description provided for @errorTimeout.
   ///

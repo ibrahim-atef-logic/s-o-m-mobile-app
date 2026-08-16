@@ -36,7 +36,9 @@ class ErrorInterceptor extends Interceptor {
       }
     }
 
-    if (code == 401) {
+    final bool accountDisabled =
+        message.toUpperCase().contains('ACCOUNT_DISABLED');
+    if (code == 401 || (code == 403 && accountDisabled)) {
       handler.reject(
         DioException(
           requestOptions: err.requestOptions,

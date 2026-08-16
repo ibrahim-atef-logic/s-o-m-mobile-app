@@ -98,4 +98,40 @@ void main() {
 
     expect(find.text(Fixtures.salesId), findsOneWidget);
   });
+
+  testWidgets('incomplete warehouse session still loads home with banner', (
+    WidgetTester tester,
+  ) async {
+    when(() => authBloc.state).thenReturn(
+      const AuthAuthenticated(
+        UserSessionEntity(
+          personnelNumber: '12344',
+          workerRecId: 2,
+          name: 'مروان وهاس',
+          companies: <CompanyEntity>[
+            CompanyEntity(code: 'PLTR', name: 'PLTR', groupId: ''),
+          ],
+          activeCompany: 'PLTR',
+          needsWarehouseSelection: true,
+        ),
+      ),
+    );
+    when(() => salesBloc.state).thenReturn(
+      const SalesOrdersLoaded(<SalesOrderHeaderEntity>[]),
+    );
+
+    await pumpTestApp(
+      tester,
+      providers: <BlocProvider<dynamic>>[
+        BlocProvider<AuthBloc>.value(value: authBloc),
+        BlocProvider<SalesOrdersBloc>.value(value: salesBloc),
+        BlocProvider<LocaleCubit>.value(value: localeCubit),
+      ],
+      home: const MySalesOrdersPage(),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Warehouse is not assigned'), findsOneWidget);
+    verify(() => salesBloc.add(const SalesOrdersRequested('PLTR'))).called(1);
+  });
 }

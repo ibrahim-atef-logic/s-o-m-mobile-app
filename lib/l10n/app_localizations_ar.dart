@@ -33,7 +33,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get personnelNumber => 'رقم الموظف';
 
   @override
-  String get personnelNumberHint => 'أدخل رقم الموظف';
+  String get personnelNumberHint => 'رقم الموظف أو المعرّف';
 
   @override
   String get password => 'كلمة المرور';
@@ -42,13 +42,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passwordHint => 'أدخل كلمة المرور';
 
   @override
-  String get companyCode => 'الشركة';
+  String get companyCode => 'كود البيئة / المستأجر';
 
   @override
-  String get companyCodeHint => 'كود شركة Dynamics (مثل usmf)';
+  String get companyCodeHint => 'كود البيئة / المستأجر';
 
   @override
-  String get errorCompanyRequired => 'الشركة مطلوبة';
+  String get errorCompanyRequired => 'كود البيئة مطلوب';
 
   @override
   String get showPassword => 'إظهار كلمة المرور';
@@ -320,10 +320,71 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorAuth => 'بيانات الدخول غير صحيحة';
 
   @override
-  String get errorAuthCompanyUnknown => 'الشركة غير مسجّلة';
+  String get errorAuthCompanyUnknown => 'كود البيئة غير مسجّل';
 
   @override
   String get errorAuthCredentials => 'رقم الموظف أو كلمة المرور غير صحيحة';
+
+  @override
+  String get errorAccountDisabled => 'الحساب غير نشط في D365 / الموبايل';
+
+  @override
+  String get errorPasswordChangeFailed => 'تعذر تغيير كلمة المرور';
+
+  @override
+  String get errorWarehouseNotAssigned =>
+      'لم يتم تعيين مستودع / No warehouse assigned';
+
+  @override
+  String get profileTitle => 'الملف الشخصي';
+
+  @override
+  String get profileName => 'الاسم';
+
+  @override
+  String get profileUserId => 'معرّف المستخدم';
+
+  @override
+  String get profileActiveCompany => 'الشركة';
+
+  @override
+  String get profileDefaultWarehouse => 'المستودع الافتراضي';
+
+  @override
+  String get profileChannel => 'الفرع';
+
+  @override
+  String get profileCurrency => 'العملة';
+
+  @override
+  String get profileDefaultCustomer => 'العميل الافتراضي';
+
+  @override
+  String get warehouseNotAssignedBanner =>
+      'لم يتم تعيين مستودع / Warehouse is not assigned. اختيار المستودع غير متاح حالياً / Warehouse picker is not available yet.';
+
+  @override
+  String get changePassword => 'تغيير كلمة المرور';
+
+  @override
+  String get oldPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور الجديدة';
+
+  @override
+  String get errorPasswordMismatch =>
+      'كلمة المرور الجديدة وتأكيدها غير متطابقين';
+
+  @override
+  String get errorPasswordSameAsOld =>
+      'يجب أن تختلف كلمة المرور الجديدة عن الحالية';
+
+  @override
+  String get passwordChanged => 'تم تغيير كلمة المرور';
 
   @override
   String get errorTimeout => 'انتهت مهلة الطلب';

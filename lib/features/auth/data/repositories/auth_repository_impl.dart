@@ -34,36 +34,21 @@ class AuthRepositoryImpl implements AuthRepository {
       );
       await _local.saveSession(model);
       return Right<Failure, AuthTokensEntity>(model.toEntity());
-    } on AuthException catch (e) {
-      return Left<Failure, AuthTokensEntity>(AuthFailure(e.message));
-    } on NetworkException {
-      return const Left<Failure, AuthTokensEntity>(NetworkFailure());
-    } on ServerException catch (e) {
-      return Left<Failure, AuthTokensEntity>(ServerFailure(e.message));
-    } on CacheException {
-      return const Left<Failure, AuthTokensEntity>(CacheFailure());
+    } catch (e) {
+      return Left<Failure, AuthTokensEntity>(_map(e));
     }
   }
 
   @override
   Future<Either<Failure, AuthTokensEntity>> refresh() async {
     try {
-      final String? refreshToken = await _local.readRefreshToken();
-      if (refreshToken == null) {
-        return const Left<Failure, AuthTokensEntity>(AuthFailure());
-      }
-      final AuthResponseModel model = await _remote.refresh(refreshToken);
-      await _local.saveAccessToken(model.accessToken);
-      await _local.saveSession(model);
+      final AuthResponseModel? cached = await _local.readSession();
+      final AuthResponseModel model = await _refreshAndCache(
+        fallbackUser: cached?.user,
+      );
       return Right<Failure, AuthTokensEntity>(model.toEntity());
-    } on AuthException catch (e) {
-      return Left<Failure, AuthTokensEntity>(AuthFailure(e.message));
-    } on NetworkException {
-      return const Left<Failure, AuthTokensEntity>(NetworkFailure());
-    } on ServerException catch (e) {
-      return Left<Failure, AuthTokensEntity>(ServerFailure(e.message));
-    } on CacheException {
-      return const Left<Failure, AuthTokensEntity>(CacheFailure());
+    } catch (e) {
+      return Left<Failure, AuthTokensEntity>(_map(e));
     }
   }
 
@@ -74,24 +59,69 @@ class AuthRepositoryImpl implements AuthRepository {
       if (refreshToken != null) {
         await _remote.logout(refreshToken);
       }
-      await _local.clear();
-      return const Right<Failure, void>(null);
-    } on NetworkException {
-      await _local.clear();
-      return const Right<Failure, void>(null);
     } on Exception {
-      await _local.clear();
-      return const Right<Failure, void>(null);
+      // Always wipe local session, even if the network call fails.
     }
+    await _local.clear();
+    return const Right<Failure, void>(null);
   }
 
   @override
   Future<Either<Failure, UserSessionEntity?>> restoreSession() async {
     try {
-      final AuthResponseModel? model = await _local.readSession();
-      return Right<Failure, UserSessionEntity?>(model?.user.toEntity());
+      final AuthResponseModel? cached = await _local.readSession();
+      if (cached == null) {
+        return const Right<Failure, UserSessionEntity?>(null);
+      }
+      try {
+        final AuthResponseModel refreshed = await _refreshAndCache(
+          fallbackUser: cached.user,
+        );
+        return Right<Failure, UserSessionEntity?>(refreshed.user.toEntity());
+      } on AuthException {
+        await _local.clear();
+        return const Right<Failure, UserSessionEntity?>(null);
+      } on NetworkException {
+        return Right<Failure, UserSessionEntity?>(cached.user.toEntity());
+      } on ServerException catch (e) {
+        if (e.statusCode == 401) {
+          await _local.clear();
+          return const Right<Failure, UserSessionEntity?>(null);
+        }
+        return Right<Failure, UserSessionEntity?>(cached.user.toEntity());
+      }
     } on CacheException {
       return const Left<Failure, UserSessionEntity?>(CacheFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserSessionEntity>> fetchMe() async {
+    try {
+      final UserSessionModel me = await _remote.me();
+      final AuthResponseModel? cached = await _local.readSession();
+      if (cached != null) {
+        await _local.saveSession(cached.copyWith(user: me));
+      }
+      return Right<Failure, UserSessionEntity>(me.toEntity());
+    } catch (e) {
+      return Left<Failure, UserSessionEntity>(_map(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      final String message = await _remote.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+      return Right<Failure, String>(message);
+    } catch (e) {
+      return Left<Failure, String>(_map(e));
     }
   }
 
@@ -118,4 +148,35 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<String?> readAccessToken() => _local.readAccessToken();
+
+  Future<AuthResponseModel> _refreshAndCache({
+    UserSessionModel? fallbackUser,
+  }) async {
+    final String? refreshToken = await _local.readRefreshToken();
+    if (refreshToken == null) {
+      throw const AuthException();
+    }
+    AuthResponseModel model = await _remote.refresh(refreshToken);
+    if (model.user.personnelNumber.isEmpty && fallbackUser != null) {
+      model = model.copyWith(user: fallbackUser);
+    }
+    await _local.saveSession(model);
+    return model;
+  }
+
+  Failure _map(Object error) {
+    if (error is AuthException) {
+      return AuthFailure(error.message);
+    }
+    if (error is NetworkException) {
+      return const NetworkFailure();
+    }
+    if (error is CacheException) {
+      return const CacheFailure();
+    }
+    if (error is ServerException) {
+      return ServerFailure(error.message);
+    }
+    return const ServerFailure();
+  }
 }

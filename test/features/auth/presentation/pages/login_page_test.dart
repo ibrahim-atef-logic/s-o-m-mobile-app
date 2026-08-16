@@ -57,7 +57,7 @@ void main() {
     await tester.tap(find.text('Login'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Company is required'), findsOneWidget);
+    expect(find.text('Environment code is required'), findsOneWidget);
     expect(find.text('Personnel number is required'), findsOneWidget);
     expect(find.text('Password is required'), findsOneWidget);
     verifyNever(() => authBloc.add(any()));
@@ -78,6 +78,27 @@ void main() {
         const AuthLoginSubmitted(
           company: 'logic-trial',
           personnelNumber: '1006',
+          password: '123',
+        ),
+      ),
+    ).called(1);
+  });
+
+  testWidgets('accepts string personnel number like m.afif', (WidgetTester tester) async {
+    await pumpLogin(tester);
+
+    final Finder fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'logic-trial');
+    await tester.enterText(fields.at(1), 'm.afif');
+    await tester.enterText(fields.at(2), '123');
+    await tester.tap(find.text('Login'));
+    await tester.pump();
+
+    verify(
+      () => authBloc.add(
+        const AuthLoginSubmitted(
+          company: 'logic-trial',
+          personnelNumber: 'm.afif',
           password: '123',
         ),
       ),

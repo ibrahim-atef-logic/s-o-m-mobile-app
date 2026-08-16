@@ -77,7 +77,7 @@ class QuickAddBloc extends Bloc<QuickAddEvent, QuickAddState> {
       state.copyWith(
         lines: next,
         barcode: '',
-        quantityText: '',
+        quantityText: '1',
         validation: QuickAddValidation.none,
         lineAdded: true,
       ),
@@ -127,7 +127,7 @@ class QuickAddBloc extends Bloc<QuickAddEvent, QuickAddState> {
     emit(
       state.copyWith(
         barcode: '',
-        quantityText: '',
+        quantityText: '1',
         validation: QuickAddValidation.none,
         clearError: true,
         lineAdded: false,

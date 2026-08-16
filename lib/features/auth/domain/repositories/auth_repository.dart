@@ -17,6 +17,13 @@ abstract class AuthRepository {
 
   Future<Either<Failure, UserSessionEntity?>> restoreSession();
 
+  Future<Either<Failure, UserSessionEntity>> fetchMe();
+
+  Future<Either<Failure, String>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  });
+
   Future<Either<Failure, void>> persistSelectedCompany(String companyCode);
 
   Future<String?> readAccessToken();

@@ -26,8 +26,9 @@ extension _FullAddBlocAsync on FullAddBloc {
     await lookup.fold(
       (Failure f) async => emit(state.copyWith(lookingUp: false, failure: f)),
       (BarcodeItemEntity item) async {
-        emit(state.copyWith(lookingUp: false, item: item));
+        emit(state.copyWith(lookingUp: false, item: item, quantityText: '1'));
         await _resolvePrice(emit);
+        await _fetchOnHand(emit);
       },
     );
   }
@@ -49,15 +50,9 @@ extension _FullAddBlocAsync on FullAddBloc {
     );
   }
 
-  Future<void> _onGetQty(
-    FullAddGetQtyRequested event,
-    Emitter<FullAddState> emit,
-  ) async {
+  Future<void> _fetchOnHand(Emitter<FullAddState> emit) async {
     final BarcodeItemEntity? item = state.item;
-    if (item == null) {
-      emit(state.copyWith(validation: FullAddValidation.lookupRequired));
-      return;
-    }
+    if (item == null) return;
     emit(state.copyWith(fetchingQty: true, clearError: true));
     final Either<Failure, WarehouseOnHandEntity> result = await _actions
         .getOnHand(item: item, order: state.order);
@@ -77,6 +72,14 @@ extension _FullAddBlocAsync on FullAddBloc {
         ),
       ),
     );
+  }
+
+  Future<void> _onGetQty(
+    FullAddGetQtyRequested event,
+    Emitter<FullAddState> emit,
+  ) async {
+    // Kept for compatibility; UI no longer exposes Get Quantity.
+    await _fetchOnHand(emit);
   }
 
   Future<void> _onSubmit(

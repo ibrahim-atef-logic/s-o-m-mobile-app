@@ -13,7 +13,7 @@ class QuickAddState extends Equatable {
     required this.order,
     this.lines = const <QuickCartLineEntity>[],
     this.barcode = '',
-    this.quantityText = '',
+    this.quantityText = '1',
     this.submitting = false,
     this.validation = QuickAddValidation.none,
     this.failure,

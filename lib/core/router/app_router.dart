@@ -1,12 +1,13 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
+import '../../features/auth/presentation/cubit/change_password_cubit.dart';
+import '../../features/auth/presentation/pages/change_password_page.dart';
 import '../../features/auth/presentation/pages/hello_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
+import '../../features/auth/presentation/pages/profile_page.dart';
 import '../../features/failed_lines/presentation/pages/failed_lines_page.dart';
 import '../../features/full_add/presentation/bloc/full_add_bloc.dart';
 import '../../features/full_add/presentation/pages/full_add_cart_page.dart';
@@ -19,9 +20,8 @@ import '../../features/sales_orders/presentation/bloc/sales_orders_bloc.dart';
 import '../../features/sales_orders/presentation/pages/my_sales_orders_page.dart';
 import '../../features/sales_orders/presentation/pages/sales_order_details_page.dart';
 import '../../features/so_lines/presentation/pages/so_lines_page.dart';
-import '../../l10n/app_localizations.dart';
 import '../di/injection.dart';
-import '../widgets/states/app_empty_view.dart';
+import 'app_router_support.dart';
 
 GoRouter createAppRouter(AuthBloc authBloc) {
   return GoRouter(
@@ -59,6 +59,21 @@ GoRouter createAppRouter(AuthBloc authBloc) {
         },
       ),
       GoRoute(
+        path: '/profile',
+        builder: (BuildContext context, GoRouterState state) {
+          return const ProfilePage();
+        },
+      ),
+      GoRoute(
+        path: '/profile/change-password',
+        builder: (BuildContext context, GoRouterState state) {
+          return BlocProvider<ChangePasswordCubit>(
+            create: (_) => sl<ChangePasswordCubit>(),
+            child: const ChangePasswordPage(),
+          );
+        },
+      ),
+      GoRoute(
         path: '/orders',
         builder: (BuildContext context, GoRouterState state) {
           return BlocProvider<SalesOrdersBloc>(
@@ -72,7 +87,7 @@ GoRouter createAppRouter(AuthBloc authBloc) {
         builder: (BuildContext context, GoRouterState state) {
           final Object? extra = state.extra;
           if (extra is! SalesOrderHeaderEntity) {
-            return _MissingScaffold(messageKey: _MissingKind.order);
+            return const MissingRouteScaffold(kind: MissingRouteKind.order);
           }
           return SalesOrderDetailsPage(order: extra);
         },
@@ -90,7 +105,7 @@ GoRouter createAppRouter(AuthBloc authBloc) {
         builder: (BuildContext context, GoRouterState state) {
           final Object? extra = state.extra;
           if (extra is! SalesOrderHeaderEntity) {
-            return _MissingScaffold(messageKey: _MissingKind.order);
+            return const MissingRouteScaffold(kind: MissingRouteKind.order);
           }
           return BlocProvider<FullAddBloc>(
             create: (_) => sl<FullAddBloc>(param1: extra),
@@ -103,7 +118,7 @@ GoRouter createAppRouter(AuthBloc authBloc) {
         builder: (BuildContext context, GoRouterState state) {
           final Object? extra = state.extra;
           if (extra is! FullAddBloc) {
-            return _MissingScaffold(messageKey: _MissingKind.session);
+            return const MissingRouteScaffold(kind: MissingRouteKind.session);
           }
           return BlocProvider<FullAddBloc>.value(
             value: extra,
@@ -116,7 +131,7 @@ GoRouter createAppRouter(AuthBloc authBloc) {
         builder: (BuildContext context, GoRouterState state) {
           final Object? extra = state.extra;
           if (extra is! SalesOrderHeaderEntity) {
-            return _MissingScaffold(messageKey: _MissingKind.order);
+            return const MissingRouteScaffold(kind: MissingRouteKind.order);
           }
           return BlocProvider<QuickAddBloc>(
             create: (_) => sl<QuickAddBloc>(param1: extra),
@@ -129,7 +144,7 @@ GoRouter createAppRouter(AuthBloc authBloc) {
         builder: (BuildContext context, GoRouterState state) {
           final Object? extra = state.extra;
           if (extra is! QuickAddBloc) {
-            return _MissingScaffold(messageKey: _MissingKind.session);
+            return const MissingRouteScaffold(kind: MissingRouteKind.session);
           }
           return BlocProvider<QuickAddBloc>.value(
             value: extra,
@@ -152,38 +167,4 @@ GoRouter createAppRouter(AuthBloc authBloc) {
       ),
     ],
   );
-}
-
-enum _MissingKind { order, session }
-
-class _MissingScaffold extends StatelessWidget {
-  const _MissingScaffold({required this.messageKey});
-
-  final _MissingKind messageKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final AppLocalizations l10n = AppLocalizations.of(context);
-    final String message = switch (messageKey) {
-      _MissingKind.order => l10n.errorMissingOrder,
-      _MissingKind.session => l10n.errorMissingSession,
-    };
-    return Scaffold(
-      body: AppEmptyView(title: message, icon: Icons.warning_amber_outlined),
-    );
-  }
-}
-
-class GoRouterAuthRefresh extends ChangeNotifier {
-  GoRouterAuthRefresh(AuthBloc bloc) {
-    _sub = bloc.stream.listen((AuthState _) => notifyListeners());
-  }
-
-  late final StreamSubscription<AuthState> _sub;
-
-  @override
-  void dispose() {
-    unawaited(_sub.cancel());
-    super.dispose();
-  }
 }

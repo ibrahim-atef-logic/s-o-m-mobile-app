@@ -10,6 +10,11 @@ void main() {
     test('returns empty string for null', () {
       expect(JsonString.trim(null), '');
     });
+
+    test('stringifies JSON numbers so personnelNumber stays a string', () {
+      expect(JsonString.trim(1006), '1006');
+      expect(JsonString.trim(1006), isA<String>());
+    });
   });
 
   group('JsonString.trimOrNull', () {

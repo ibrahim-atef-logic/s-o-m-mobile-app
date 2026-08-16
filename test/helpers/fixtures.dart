@@ -63,26 +63,68 @@ abstract final class Fixtures {
     'productName': 'Bag Item',
   };
 
+  static const Map<String, dynamic> sampleActivationUser1006 = <String, dynamic>{
+    'personnelNumber': personnelNumber,
+    'workerRecId': 5637227826,
+    'name': 'محمد عفيف',
+    'userId': 'm.afif',
+    'activationRecId': 5637144576,
+    'isActive': true,
+    'userInfoEnable': true,
+    'company': 'mm',
+    'companies': <Map<String, dynamic>>[
+      <String, dynamic>{'code': 'mm', 'name': 'mm', 'groupId': null},
+    ],
+    'retailChannelTableRecId': 5637152827,
+    'retailChannelId': '912',
+    'channelType': 4,
+    'inventLocation': 'MMS000WH',
+    'inventLocationDataAreaId': 'mm',
+    'currency': 'SAR',
+    'defaultCustAccount': '10-10002',
+    'defaultCustDataAreaId': 'mm',
+    'activeCompany': 'mm',
+    'activeWarehouse': 'MMS000WH',
+    'needsWarehouseSelection': false,
+  };
+
+  static const Map<String, dynamic> sampleActivationUser12344 =
+      <String, dynamic>{
+    'personnelNumber': '12344',
+    'workerRecId': 5637227999,
+    'name': 'مروان وهاس',
+    'userId': 'm.wahas',
+    'activationRecId': 5637144577,
+    'isActive': true,
+    'userInfoEnable': true,
+    'company': 'PLTR',
+    'companies': <Map<String, dynamic>>[
+      <String, dynamic>{'code': 'PLTR', 'name': 'PLTR', 'groupId': null},
+    ],
+    'retailChannelTableRecId': null,
+    'retailChannelId': '',
+    'channelType': null,
+    'inventLocation': '',
+    'inventLocationDataAreaId': '',
+    'currency': '',
+    'defaultCustAccount': '',
+    'defaultCustDataAreaId': '',
+    'activeCompany': 'PLTR',
+    'activeWarehouse': '',
+    'needsWarehouseSelection': true,
+  };
+
   static const Map<String, dynamic> sampleLoginDataJson = <String, dynamic>{
     'accessToken': 'access-token-sample',
     'refreshToken': 'refresh-token-sample',
-    'user': <String, dynamic>{
-      'personnelNumber': personnelNumber,
-      'workerRecId': 1006,
-      'name': 'Trial User',
-      'companies': <Map<String, dynamic>>[
-        <String, dynamic>{
-          'code': 'mm',
-          'name': 'MM Company',
-          'groupId': 'GRP-MM',
-        },
-        <String, dynamic>{
-          'code': 'rest',
-          'name': 'REST Company',
-          'groupId': 'GRP-REST',
-        },
-      ],
-    },
+    'user': sampleActivationUser1006,
+  };
+
+  static const Map<String, dynamic> sampleLoginDataIncompleteJson =
+      <String, dynamic>{
+    'accessToken': 'access-token-12344',
+    'refreshToken': 'refresh-token-12344',
+    'user': sampleActivationUser12344,
   };
 
   static const Map<String, dynamic> sampleFailedLineJson = <String, dynamic>{

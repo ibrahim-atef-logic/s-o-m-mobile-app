@@ -39,6 +39,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
         key: StorageKeys.refreshToken,
         value: session.refreshToken,
       );
+      await _secure.write(
+        key: StorageKeys.authSessionJson,
+        value: jsonEncode(session.toJson()),
+      );
       await _prefs.setString(
         StorageKeys.userJson,
         jsonEncode(session.user.toJson()),
@@ -51,29 +55,39 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   @override
   Future<AuthResponseModel?> readSession() async {
     try {
-      final String? access = await _secure.read(key: StorageKeys.accessToken);
-      final String? refresh = await _secure.read(key: StorageKeys.refreshToken);
-      final String? userJson = _prefs.getString(StorageKeys.userJson);
-      if (access == null || refresh == null || userJson == null) {
-        return null;
+      final String? blob = await _secure.read(key: StorageKeys.authSessionJson);
+      if (blob != null && blob.isNotEmpty) {
+        return AuthResponseModel.fromJson(
+          jsonDecode(blob) as Map<String, dynamic>,
+        );
       }
-      final UserSessionModel user = UserSessionModel.fromJson(
-        jsonDecode(userJson) as Map<String, dynamic>,
-      );
-      return AuthResponseModel(
-        accessToken: access,
-        refreshToken: refresh,
-        user: user,
-      );
+      return _readLegacySession();
     } catch (_) {
       throw const CacheException();
     }
+  }
+
+  Future<AuthResponseModel?> _readLegacySession() async {
+    final String? access = await _secure.read(key: StorageKeys.accessToken);
+    final String? refresh = await _secure.read(key: StorageKeys.refreshToken);
+    final String? userJson = _prefs.getString(StorageKeys.userJson);
+    if (access == null || refresh == null || userJson == null) {
+      return null;
+    }
+    return AuthResponseModel(
+      accessToken: access,
+      refreshToken: refresh,
+      user: UserSessionModel.fromJson(
+        jsonDecode(userJson) as Map<String, dynamic>,
+      ),
+    );
   }
 
   @override
   Future<void> clear() async {
     await _secure.delete(key: StorageKeys.accessToken);
     await _secure.delete(key: StorageKeys.refreshToken);
+    await _secure.delete(key: StorageKeys.authSessionJson);
     await _prefs.remove(StorageKeys.userJson);
     await _prefs.remove(StorageKeys.selectedCompany);
   }
@@ -84,19 +98,15 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       StorageKeys.selectedCompany,
       jsonEncode(company.toJson()),
     );
-    final String? userJson = _prefs.getString(StorageKeys.userJson);
-    if (userJson == null) return;
-    final UserSessionModel user = UserSessionModel.fromJson(
-      jsonDecode(userJson) as Map<String, dynamic>,
+    final AuthResponseModel? session = await readSession();
+    if (session == null) {
+      return;
+    }
+    final Map<String, dynamic> userJson = session.user.toJson();
+    userJson['selectedCompany'] = company.toJson();
+    await saveSession(
+      session.copyWith(user: UserSessionModel.fromJson(userJson)),
     );
-    final UserSessionModel updated = UserSessionModel(
-      personnelNumber: user.personnelNumber,
-      workerRecId: user.workerRecId,
-      name: user.name,
-      companies: user.companies,
-      selectedCompany: company,
-    );
-    await _prefs.setString(StorageKeys.userJson, jsonEncode(updated.toJson()));
   }
 
   @override

@@ -63,6 +63,28 @@ void main() {
     }
   });
 
+  test('maps 403 ACCOUNT_DISABLED to AuthException', () async {
+    final Dio dio = _dioWith(
+      _FixedAdapter(
+        (_) async => _jsonBody(403, <String, dynamic>{
+          'success': false,
+          'error': <String, dynamic>{
+            'code': 'ACCOUNT_DISABLED',
+            'message': 'User is inactive',
+          },
+        }),
+      ),
+    );
+
+    try {
+      await dio.post<dynamic>('/api/v1/auth/login');
+      fail('expected DioException');
+    } on DioException catch (e) {
+      expect(e.error, isA<AuthException>());
+      expect((e.error! as AuthException).message, contains('ACCOUNT_DISABLED'));
+    }
+  });
+
   test('maps connection timeout to NetworkException', () async {
     final Dio dio = _dioWith(
       _FixedAdapter(

@@ -14,10 +14,17 @@ class GetOnHandUseCase {
     required String warehouse,
     required String company,
   }) {
-    if (itemNumber.trim().isEmpty || warehouse.trim().isEmpty) {
+    if (warehouse.trim().isEmpty) {
       return Future<Either<Failure, WarehouseOnHandEntity>>.value(
         const Left<Failure, WarehouseOnHandEntity>(
-          ValidationFailure('Item and warehouse are required'),
+          ValidationFailure('WAREHOUSE_NOT_ASSIGNED'),
+        ),
+      );
+    }
+    if (itemNumber.trim().isEmpty) {
+      return Future<Either<Failure, WarehouseOnHandEntity>>.value(
+        const Left<Failure, WarehouseOnHandEntity>(
+          ValidationFailure('Item is required'),
         ),
       );
     }

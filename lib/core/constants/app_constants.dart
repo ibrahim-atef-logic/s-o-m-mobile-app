@@ -26,4 +26,5 @@ abstract final class StorageKeys {
   static const String localeCode = 'locale_code';
   static const String selectedCompany = 'selected_company';
   static const String userJson = 'user_json';
+  static const String authSessionJson = 'auth_session_json';
 }

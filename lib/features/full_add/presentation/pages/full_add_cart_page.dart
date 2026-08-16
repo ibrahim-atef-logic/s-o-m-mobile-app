@@ -20,23 +20,6 @@ class FullAddCartPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.fullAdd),
-        actions: <Widget>[
-          Semantics(
-            label: l10n.failedLines,
-            button: true,
-            child: IconButton(
-              tooltip: l10n.failedLines,
-              onPressed: () {
-                final FullAddState state = context.read<FullAddBloc>().state;
-                context.push(
-                  '/orders/${state.order.salesId}/failed-lines'
-                  '?company=${state.order.dataArea}&mode=full',
-                );
-              },
-              icon: const Icon(Icons.error_outline),
-            ),
-          ),
-        ],
       ),
       body: BlocBuilder<FullAddBloc, FullAddState>(
         builder: (BuildContext context, FullAddState state) {

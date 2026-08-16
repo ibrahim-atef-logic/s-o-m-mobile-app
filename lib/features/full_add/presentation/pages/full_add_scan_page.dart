@@ -54,10 +54,14 @@ class _FullAddScanPageState extends State<FullAddScanPage> {
         listenWhen: (FullAddState p, FullAddState c) =>
             c.submitSucceeded ||
             (c.failure != null && c.failure != p.failure) ||
-            c.barcode != p.barcode,
+            c.barcode != p.barcode ||
+            c.quantityText != p.quantityText,
         listener: (BuildContext context, FullAddState state) {
           if (state.barcode != _barcodeCtrl.text) {
             _barcodeCtrl.text = state.barcode;
+          }
+          if (state.quantityText != _qtyCtrl.text) {
+            _qtyCtrl.text = state.quantityText;
           }
           if (state.submitSucceeded) {
             showAppSnackBar(
@@ -156,16 +160,8 @@ class _FullAddScanPageState extends State<FullAddScanPage> {
                   ),
                 ),
               ],
-              const SizedBox(height: AppDimensions.spaceMd),
-              PrimaryButton(
-                label: l10n.getQuantity,
-                isLoading: state.fetchingQty,
-                onPressed: state.item == null
-                    ? null
-                    : () => context.read<FullAddBloc>().add(
-                        const FullAddGetQtyRequested(),
-                      ),
-              ),
+              // Get Quantity button removed — stock is fetched automatically after lookup.
+              // Quantity defaults to 1.
               const SizedBox(height: AppDimensions.spaceMd),
               SectionLabel(l10n.stepQuantity),
               QuantityStepper(
@@ -200,7 +196,7 @@ class _FullAddScanPageState extends State<FullAddScanPage> {
 
   int _activeStep(FullAddState state) {
     if (state.item == null) return 0;
-    if (state.onHand == null || state.quantityText.isEmpty) return 1;
+    if (state.onHand == null) return 1;
     return 2;
   }
 

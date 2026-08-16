@@ -38,3 +38,11 @@ final class AuthCompanySelected extends AuthEvent {
 final class AuthLogoutRequested extends AuthEvent {
   const AuthLogoutRequested();
 }
+
+final class AuthSessionExpired extends AuthEvent {
+  const AuthSessionExpired();
+}
+
+final class AuthProfileOpened extends AuthEvent {
+  const AuthProfileOpened();
+}

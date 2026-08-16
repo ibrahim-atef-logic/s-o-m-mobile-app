@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -70,11 +69,10 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _company,
                     decoration: InputDecoration(
                       labelText: l10n.companyCode,
-                      hintText: l10n.companyCodeHint,
                       prefixIcon: const Icon(Icons.business_outlined),
                     ),
                     textInputAction: TextInputAction.next,
-                    textCapitalization: TextCapitalization.characters,
+                    textCapitalization: TextCapitalization.none,
                     validator: (String? v) {
                       if (v == null || v.trim().isEmpty) {
                         return l10n.errorCompanyRequired;
@@ -87,13 +85,12 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _personnel,
                     decoration: InputDecoration(
                       labelText: l10n.personnelNumber,
-                      hintText: l10n.personnelNumberHint,
                       prefixIcon: const Icon(Icons.badge_outlined),
                     ),
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
+                    keyboardType: TextInputType.text,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    textCapitalization: TextCapitalization.none,
                     autofillHints: const <String>[AutofillHints.username],
                     textInputAction: TextInputAction.next,
                     validator: (String? v) {
@@ -108,7 +105,6 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _password,
                     decoration: InputDecoration(
                       labelText: l10n.password,
-                      hintText: l10n.passwordHint,
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: Semantics(
                         label: _obscure ? l10n.showPassword : l10n.hidePassword,
@@ -153,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
     context.read<AuthBloc>().add(
           AuthLoginSubmitted(
             company: _company.text,
-            personnelNumber: _personnel.text,
+            personnelNumber: _personnel.text.trim(),
             password: _password.text,
           ),
         );

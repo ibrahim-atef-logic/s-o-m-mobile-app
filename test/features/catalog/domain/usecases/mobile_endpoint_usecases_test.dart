@@ -24,13 +24,13 @@ class MockCatalogRepository extends Mock implements CatalogRepository {}
 
 class MockSalesOrdersRepository extends Mock implements SalesOrdersRepository {}
 
-/// Unit coverage for every mobile-backed API use case (company=logic-trial).
+/// Unit coverage for every mobile-backed API use case (company=mm).
 void main() {
   late MockCatalogRepository catalog;
   late MockSalesOrdersRepository salesOrders;
 
-  const String company = 'logic-trial';
-  const String salesId = 'SO-000200';
+  const String company = 'mm';
+  const String salesId = 'MM-245265';
 
   setUp(() {
     catalog = MockCatalogRepository();

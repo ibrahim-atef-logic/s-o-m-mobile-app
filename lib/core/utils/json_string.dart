@@ -1,6 +1,12 @@
 /// Shared parsing helpers for Dynamics/OData string fields.
 abstract final class JsonString {
-  static String trim(Object? value) => (value as String? ?? '').trim();
+  /// Always a string: JSON numbers like `1006` become `"1006"`.
+  static String trim(Object? value) {
+    if (value == null) {
+      return '';
+    }
+    return value.toString().trim();
+  }
 
   static String? trimOrNull(Object? value) {
     if (value == null) return null;
