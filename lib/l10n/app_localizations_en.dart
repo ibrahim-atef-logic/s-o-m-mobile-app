@@ -94,6 +94,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchOrders => 'Search orders';
 
   @override
+  String get newSalesOrder => 'New sales order';
+
+  @override
+  String get createOrder => 'Create order';
+
+  @override
+  String orderCreated(String salesId) {
+    return 'Order $salesId created';
+  }
+
+  @override
+  String get selectCustomer => 'Select customer';
+
+  @override
+  String get searchCustomers => 'Search by account or name';
+
+  @override
+  String get noCustomers => 'No customers match this search';
+
+  @override
+  String get errorCustomersLoadFailed =>
+      'Could not load customers, please try again';
+
+  @override
+  String get errorCustomerRequired => 'Select a customer first';
+
+  @override
   String get noOrders => 'No open sales orders';
 
   @override
@@ -362,7 +389,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get warehouseNotAssignedBanner =>
-      'Warehouse is not assigned / لم يتم تعيين مستودع. Warehouse picker is not available yet / اختيار المستودع غير متاح حالياً.';
+      'No warehouse is assigned to your account. Select a standard warehouse to continue.';
+
+  @override
+  String get selectWarehouse => 'Select warehouse';
+
+  @override
+  String get selectWarehouseHint =>
+      'Choose the standard warehouse you work with';
+
+  @override
+  String get searchWarehouses => 'Search warehouses';
+
+  @override
+  String get noWarehouses =>
+      'No standard warehouses are available for this company';
+
+  @override
+  String get errorWarehousesLoadFailed =>
+      'Could not load warehouses, please try again';
+
+  @override
+  String get warehouseSelected => 'Warehouse selected';
+
+  @override
+  String get changeWarehouse => 'Change warehouse';
 
   @override
   String get changePassword => 'Change password';

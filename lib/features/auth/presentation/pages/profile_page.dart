@@ -53,6 +53,12 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: AppDimensions.spaceMd),
               OutlinedButton.icon(
+                onPressed: () => context.push('/warehouse?change=1'),
+                icon: const Icon(Icons.warehouse_outlined),
+                label: Text(l10n.changeWarehouse),
+              ),
+              const SizedBox(height: AppDimensions.spaceSm),
+              OutlinedButton.icon(
                 onPressed: () => context.push('/profile/change-password'),
                 icon: const Icon(Icons.lock_reset_outlined),
                 label: Text(l10n.changePassword),

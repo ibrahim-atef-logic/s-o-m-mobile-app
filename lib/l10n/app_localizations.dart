@@ -248,6 +248,54 @@ abstract class AppLocalizations {
   /// **'Search orders'**
   String get searchOrders;
 
+  /// No description provided for @newSalesOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'New sales order'**
+  String get newSalesOrder;
+
+  /// No description provided for @createOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Create order'**
+  String get createOrder;
+
+  /// No description provided for @orderCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Order {salesId} created'**
+  String orderCreated(String salesId);
+
+  /// No description provided for @selectCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Select customer'**
+  String get selectCustomer;
+
+  /// No description provided for @searchCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by account or name'**
+  String get searchCustomers;
+
+  /// No description provided for @noCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'No customers match this search'**
+  String get noCustomers;
+
+  /// No description provided for @errorCustomersLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load customers, please try again'**
+  String get errorCustomersLoadFailed;
+
+  /// No description provided for @errorCustomerRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a customer first'**
+  String get errorCustomerRequired;
+
   /// No description provided for @noOrders.
   ///
   /// In en, this message translates to:
@@ -707,8 +755,50 @@ abstract class AppLocalizations {
   /// No description provided for @warehouseNotAssignedBanner.
   ///
   /// In en, this message translates to:
-  /// **'Warehouse is not assigned / لم يتم تعيين مستودع. Warehouse picker is not available yet / اختيار المستودع غير متاح حالياً.'**
+  /// **'No warehouse is assigned to your account. Select a standard warehouse to continue.'**
   String get warehouseNotAssignedBanner;
+
+  /// No description provided for @selectWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Select warehouse'**
+  String get selectWarehouse;
+
+  /// No description provided for @selectWarehouseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the standard warehouse you work with'**
+  String get selectWarehouseHint;
+
+  /// No description provided for @searchWarehouses.
+  ///
+  /// In en, this message translates to:
+  /// **'Search warehouses'**
+  String get searchWarehouses;
+
+  /// No description provided for @noWarehouses.
+  ///
+  /// In en, this message translates to:
+  /// **'No standard warehouses are available for this company'**
+  String get noWarehouses;
+
+  /// No description provided for @errorWarehousesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load warehouses, please try again'**
+  String get errorWarehousesLoadFailed;
+
+  /// No description provided for @warehouseSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse selected'**
+  String get warehouseSelected;
+
+  /// No description provided for @changeWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Change warehouse'**
+  String get changeWarehouse;
 
   /// No description provided for @changePassword.
   ///

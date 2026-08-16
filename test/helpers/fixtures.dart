@@ -63,56 +63,132 @@ abstract final class Fixtures {
     'productName': 'Bag Item',
   };
 
-  static const Map<String, dynamic> sampleActivationUser1006 = <String, dynamic>{
-    'personnelNumber': personnelNumber,
-    'workerRecId': 5637227826,
-    'name': 'محمد عفيف',
-    'userId': 'm.afif',
-    'activationRecId': 5637144576,
-    'isActive': true,
-    'userInfoEnable': true,
-    'company': 'mm',
-    'companies': <Map<String, dynamic>>[
-      <String, dynamic>{'code': 'mm', 'name': 'mm', 'groupId': null},
-    ],
-    'retailChannelTableRecId': 5637152827,
-    'retailChannelId': '912',
-    'channelType': 4,
-    'inventLocation': 'MMS000WH',
-    'inventLocationDataAreaId': 'mm',
-    'currency': 'SAR',
-    'defaultCustAccount': '10-10002',
-    'defaultCustDataAreaId': 'mm',
-    'activeCompany': 'mm',
-    'activeWarehouse': 'MMS000WH',
-    'needsWarehouseSelection': false,
+  /// `GET /api/v1/warehouses?company=mm` — Standard rows only.
+  static const List<Map<String, dynamic>> sampleWarehousesJson =
+      <Map<String, dynamic>>[
+        <String, dynamic>{
+          'dataAreaId': legalEntity,
+          'inventLocationId': 'MMS021ST',
+          'name': 'MMS021ST',
+          'inventSiteId': 'MMS021',
+          'inventLocationType': 'Standard',
+        },
+        <String, dynamic>{
+          'dataAreaId': legalEntity,
+          'inventLocationId': warehouse,
+          'name': 'Main warehouse',
+          'inventSiteId': 'MMS000',
+          'inventLocationType': 'Standard',
+        },
+      ];
+
+  /// `GET /api/v1/warehouses?company=PLTR` — user 12344 environment.
+  static const List<Map<String, dynamic>> samplePltrWarehousesJson =
+      <Map<String, dynamic>>[
+        <String, dynamic>{
+          'dataAreaId': 'PLTR',
+          'inventLocationId': 'PLS001WH',
+          'name': 'Trial main warehouse',
+          'inventSiteId': 'PLS001',
+          'inventLocationType': 'Standard',
+        },
+        <String, dynamic>{
+          'dataAreaId': 'PLTR',
+          'inventLocationId': 'PLS002WH',
+          'name': null,
+          'inventSiteId': 'PLS002',
+          'inventLocationType': 'Standard',
+        },
+      ];
+
+  /// `GET /api/v1/customers?company=mm`
+  static const List<Map<String, dynamic>> sampleCustomersJson =
+      <Map<String, dynamic>>[
+        <String, dynamic>{
+          'dataAreaId': legalEntity,
+          'customerAccount': 'MMS021',
+          'name': 'عميل نقدي ميرا مارت جدة 01',
+          'customerGroupId': '20',
+          'salesCurrencyCode': 'SAR',
+          'primaryPhone': '',
+          'addressCity': '',
+        },
+        <String, dynamic>{
+          'dataAreaId': legalEntity,
+          'customerAccount': defaultCustAccount,
+          'name': 'Trial Customer',
+          'customerGroupId': '20',
+          'salesCurrencyCode': 'SAR',
+          'primaryPhone': '0500000000',
+          'addressCity': 'Jeddah',
+        },
+      ];
+
+  static const String defaultCustAccount = '10-10002';
+  static const String createdSalesId = 'MM-245471';
+
+  /// `POST /api/v1/sales-orders`
+  static const Map<String, dynamic> sampleCreatedOrderJson = <String, dynamic>{
+    'salesOrderNumber': createdSalesId,
+    'dataAreaId': legalEntity,
+    'custAccount': 'MMS021',
+    'inventLocationId': warehouse,
+    'inventSiteId': 'MMS000',
+    'currencyCode': 'SAR',
+    'orderTakerPersonnelNumber': personnelNumber,
   };
+
+  static const Map<String, dynamic> sampleActivationUser1006 =
+      <String, dynamic>{
+        'personnelNumber': personnelNumber,
+        'workerRecId': 5637227826,
+        'name': 'محمد عفيف',
+        'userId': 'm.afif',
+        'activationRecId': 5637144576,
+        'isActive': true,
+        'userInfoEnable': true,
+        'company': 'mm',
+        'companies': <Map<String, dynamic>>[
+          <String, dynamic>{'code': 'mm', 'name': 'mm', 'groupId': null},
+        ],
+        'retailChannelTableRecId': 5637152827,
+        'retailChannelId': '912',
+        'channelType': 4,
+        'inventLocation': 'MMS000WH',
+        'inventLocationDataAreaId': 'mm',
+        'currency': 'SAR',
+        'defaultCustAccount': '10-10002',
+        'defaultCustDataAreaId': 'mm',
+        'activeCompany': 'mm',
+        'activeWarehouse': 'MMS000WH',
+        'needsWarehouseSelection': false,
+      };
 
   static const Map<String, dynamic> sampleActivationUser12344 =
       <String, dynamic>{
-    'personnelNumber': '12344',
-    'workerRecId': 5637227999,
-    'name': 'مروان وهاس',
-    'userId': 'm.wahas',
-    'activationRecId': 5637144577,
-    'isActive': true,
-    'userInfoEnable': true,
-    'company': 'PLTR',
-    'companies': <Map<String, dynamic>>[
-      <String, dynamic>{'code': 'PLTR', 'name': 'PLTR', 'groupId': null},
-    ],
-    'retailChannelTableRecId': null,
-    'retailChannelId': '',
-    'channelType': null,
-    'inventLocation': '',
-    'inventLocationDataAreaId': '',
-    'currency': '',
-    'defaultCustAccount': '',
-    'defaultCustDataAreaId': '',
-    'activeCompany': 'PLTR',
-    'activeWarehouse': '',
-    'needsWarehouseSelection': true,
-  };
+        'personnelNumber': '12344',
+        'workerRecId': 5637227999,
+        'name': 'مروان وهاس',
+        'userId': 'm.wahas',
+        'activationRecId': 5637144577,
+        'isActive': true,
+        'userInfoEnable': true,
+        'company': 'PLTR',
+        'companies': <Map<String, dynamic>>[
+          <String, dynamic>{'code': 'PLTR', 'name': 'PLTR', 'groupId': null},
+        ],
+        'retailChannelTableRecId': null,
+        'retailChannelId': '',
+        'channelType': null,
+        'inventLocation': '',
+        'inventLocationDataAreaId': '',
+        'currency': '',
+        'defaultCustAccount': '',
+        'defaultCustDataAreaId': '',
+        'activeCompany': 'PLTR',
+        'activeWarehouse': '',
+        'needsWarehouseSelection': true,
+      };
 
   static const Map<String, dynamic> sampleLoginDataJson = <String, dynamic>{
     'accessToken': 'access-token-sample',
@@ -122,10 +198,10 @@ abstract final class Fixtures {
 
   static const Map<String, dynamic> sampleLoginDataIncompleteJson =
       <String, dynamic>{
-    'accessToken': 'access-token-12344',
-    'refreshToken': 'refresh-token-12344',
-    'user': sampleActivationUser12344,
-  };
+        'accessToken': 'access-token-12344',
+        'refreshToken': 'refresh-token-12344',
+        'user': sampleActivationUser12344,
+      };
 
   static const Map<String, dynamic> sampleFailedLineJson = <String, dynamic>{
     'id': 'fl-1',

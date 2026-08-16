@@ -42,6 +42,18 @@ void main() {
     documentStatus: 'None',
   );
 
+  const SalesOrderHeaderEntity orderWithoutWarehouse = SalesOrderHeaderEntity(
+    salesId: 'SO-000100',
+    custAccount: 'US-001',
+    salesName: 'Contoso',
+    dataArea: 'usmf',
+    priceGroupId: 'RETAIL',
+    inventLocationId: '',
+    inventSiteId: '1',
+    salesStatus: 'Backorder',
+    documentStatus: 'None',
+  );
+
   const BarcodeItemEntity item = BarcodeItemEntity(
     barcode: '6281001000002',
     itemNumber: '2000',
@@ -133,6 +145,44 @@ void main() {
       ),
       isA<FullAddState>().having((FullAddState s) => s.onHand, 'onHand', onHand),
     ],
+  );
+
+  blocTest<FullAddBloc, FullAddState>(
+    'falls back to the session warehouse when the order header has none',
+    build: () {
+      when(
+        () => getOnHand(
+          itemNumber: any(named: 'itemNumber'),
+          warehouse: any(named: 'warehouse'),
+          company: any(named: 'company'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, WarehouseOnHandEntity>(onHand),
+      );
+      return FullAddBloc(
+        order: orderWithoutWarehouse,
+        lookupBarcodeUseCase: lookup,
+        resolvePriceUseCase: resolvePrice,
+        getOnHandUseCase: getOnHand,
+        submitFullLineUseCase: submit,
+        sessionWarehouse: 'MMS000WH',
+      );
+    },
+    seed: () => const FullAddState(
+      order: orderWithoutWarehouse,
+      barcode: '6281001000002',
+      item: item,
+    ),
+    act: (FullAddBloc bloc) => bloc.add(const FullAddGetQtyRequested()),
+    verify: (_) {
+      verify(
+        () => getOnHand(
+          itemNumber: '2000',
+          warehouse: 'MMS000WH',
+          company: 'usmf',
+        ),
+      ).called(1);
+    },
   );
 
   blocTest<FullAddBloc, FullAddState>(

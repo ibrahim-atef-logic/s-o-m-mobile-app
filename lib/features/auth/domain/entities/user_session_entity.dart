@@ -60,6 +60,17 @@ class UserSessionEntity extends Equatable {
         '';
   }
 
+  /// DataArea for create-sales-order calls, which follow the warehouse company.
+  String get orderDataArea {
+    return _firstNonEmpty(<String?>[
+          inventLocationDataAreaId,
+          activeCompany,
+          company,
+          selectedCompany?.code,
+        ]) ??
+        '';
+  }
+
   String? get resolvedWarehouse =>
       _firstNonEmpty(<String?>[activeWarehouse, inventLocation]);
 

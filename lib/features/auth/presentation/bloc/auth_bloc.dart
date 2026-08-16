@@ -9,7 +9,6 @@ import '../../domain/entities/user_session_entity.dart';
 import '../../domain/usecases/fetch_me_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
-import '../../domain/usecases/restore_session_usecase.dart';
 import '../../domain/usecases/select_company_usecase.dart';
 
 part 'auth_event.dart';
@@ -20,12 +19,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({
     required LoginUseCase loginUseCase,
     required LogoutUseCase logoutUseCase,
-    required RestoreSessionUseCase restoreSessionUseCase,
     required SelectCompanyUseCase selectCompanyUseCase,
     required FetchMeUseCase fetchMeUseCase,
   }) : _loginUseCase = loginUseCase,
        _logoutUseCase = logoutUseCase,
-       _restoreSessionUseCase = restoreSessionUseCase,
        _selectCompanyUseCase = selectCompanyUseCase,
        _fetchMeUseCase = fetchMeUseCase,
        super(const AuthInitial()) {
@@ -35,27 +32,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>(_onLogout);
     on<AuthSessionExpired>(_onSessionExpired);
     on<AuthProfileOpened>(_onProfileOpened);
+    on<AuthSessionUpdated>(_onSessionUpdated);
   }
 
   final LoginUseCase _loginUseCase;
   final LogoutUseCase _logoutUseCase;
-  final RestoreSessionUseCase _restoreSessionUseCase;
   final SelectCompanyUseCase _selectCompanyUseCase;
   final FetchMeUseCase _fetchMeUseCase;
 
-  Future<void> _onStarted(AuthStarted event, Emitter<AuthState> emit) async {
-    emit(const AuthLoading());
-    final Either<Failure, UserSessionEntity?> result =
-        await _restoreSessionUseCase();
-    result.fold((Failure f) => emit(const AuthUnauthenticated()), (
-      UserSessionEntity? session,
-    ) {
-      if (session == null) {
-        emit(const AuthUnauthenticated());
-        return;
-      }
-      emit(AuthAuthenticated(_withDefaultCompany(session)));
-    });
+  /// Sessions live in memory only, so a cold start is always signed out.
+  void _onStarted(AuthStarted event, Emitter<AuthState> emit) {
+    emit(const AuthUnauthenticated());
   }
 
   Future<void> _onLogin(
@@ -70,9 +57,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     result.fold(
       (Failure f) => emit(AuthFailureState(f)),
-      (AuthTokensEntity tokens) => emit(
-        AuthAuthenticated(_withDefaultCompany(tokens.user)),
-      ),
+      (AuthTokensEntity tokens) =>
+          emit(AuthAuthenticated(_withDefaultCompany(tokens.user))),
     );
   }
 
@@ -129,12 +115,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
+  void _onSessionUpdated(AuthSessionUpdated event, Emitter<AuthState> emit) {
+    emit(AuthAuthenticated(_withDefaultCompany(event.session)));
+  }
+
   UserSessionEntity _withDefaultCompany(UserSessionEntity session) {
     final String operating = session.operatingCompany;
     if (operating.isNotEmpty) {
       final CompanyEntity? match = session.companyByCode(operating);
       return session.copyWith(
-        selectedCompany: match ??
+        selectedCompany:
+            match ??
             CompanyEntity(code: operating, name: operating, groupId: ''),
       );
     }

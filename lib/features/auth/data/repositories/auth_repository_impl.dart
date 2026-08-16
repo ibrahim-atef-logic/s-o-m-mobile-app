@@ -5,20 +5,22 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/auth_tokens_entity.dart';
 import '../../domain/entities/user_session_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_local_data_source.dart';
 import '../datasources/auth_remote_data_source.dart';
+import '../datasources/auth_session_store.dart';
 import '../models/auth_response_model.dart';
 import '../models/company_model.dart';
+import 'auth_failure_mapper.dart';
+import 'session_warehouse_merge.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({
     required AuthRemoteDataSource remote,
-    required AuthLocalDataSource local,
+    required AuthSessionStore store,
   }) : _remote = remote,
-       _local = local;
+       _store = store;
 
   final AuthRemoteDataSource _remote;
-  final AuthLocalDataSource _local;
+  final AuthSessionStore _store;
 
   @override
   Future<Either<Failure, AuthTokensEntity>> login({
@@ -32,7 +34,7 @@ class AuthRepositoryImpl implements AuthRepository {
         personnelNumber: personnelNumber,
         password: password,
       );
-      await _local.saveSession(model);
+      _store.save(model);
       return Right<Failure, AuthTokensEntity>(model.toEntity());
     } catch (e) {
       return Left<Failure, AuthTokensEntity>(_map(e));
@@ -42,10 +44,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, AuthTokensEntity>> refresh() async {
     try {
-      final AuthResponseModel? cached = await _local.readSession();
-      final AuthResponseModel model = await _refreshAndCache(
-        fallbackUser: cached?.user,
-      );
+      final AuthResponseModel model = await _refreshAndStore();
       return Right<Failure, AuthTokensEntity>(model.toEntity());
     } catch (e) {
       return Left<Failure, AuthTokensEntity>(_map(e));
@@ -55,53 +54,25 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> logout() async {
     try {
-      final String? refreshToken = await _local.readRefreshToken();
+      final String? refreshToken = _store.refreshToken;
       if (refreshToken != null) {
         await _remote.logout(refreshToken);
       }
     } on Exception {
-      // Always wipe local session, even if the network call fails.
+      // Always drop the in-memory session, even if the network call fails.
     }
-    await _local.clear();
+    _store.clear();
     return const Right<Failure, void>(null);
-  }
-
-  @override
-  Future<Either<Failure, UserSessionEntity?>> restoreSession() async {
-    try {
-      final AuthResponseModel? cached = await _local.readSession();
-      if (cached == null) {
-        return const Right<Failure, UserSessionEntity?>(null);
-      }
-      try {
-        final AuthResponseModel refreshed = await _refreshAndCache(
-          fallbackUser: cached.user,
-        );
-        return Right<Failure, UserSessionEntity?>(refreshed.user.toEntity());
-      } on AuthException {
-        await _local.clear();
-        return const Right<Failure, UserSessionEntity?>(null);
-      } on NetworkException {
-        return Right<Failure, UserSessionEntity?>(cached.user.toEntity());
-      } on ServerException catch (e) {
-        if (e.statusCode == 401) {
-          await _local.clear();
-          return const Right<Failure, UserSessionEntity?>(null);
-        }
-        return Right<Failure, UserSessionEntity?>(cached.user.toEntity());
-      }
-    } on CacheException {
-      return const Left<Failure, UserSessionEntity?>(CacheFailure());
-    }
   }
 
   @override
   Future<Either<Failure, UserSessionEntity>> fetchMe() async {
     try {
-      final UserSessionModel me = await _remote.me();
-      final AuthResponseModel? cached = await _local.readSession();
-      if (cached != null) {
-        await _local.saveSession(cached.copyWith(user: me));
+      UserSessionModel me = await _remote.me();
+      final AuthResponseModel? current = _store.session;
+      if (current != null) {
+        me = SessionWarehouseMerge.keepLocal(me, current.user);
+        _store.save(current.copyWith(user: me));
       }
       return Right<Failure, UserSessionEntity>(me.toEntity());
     } catch (e) {
@@ -129,54 +100,67 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, void>> persistSelectedCompany(
     String companyCode,
   ) async {
+    final AuthResponseModel? session = _store.session;
+    if (session == null) {
+      return const Left<Failure, void>(AuthFailure());
+    }
     try {
-      final AuthResponseModel? session = await _local.readSession();
-      if (session == null) {
-        return const Left<Failure, void>(AuthFailure());
-      }
       final CompanyModel company = session.user.companies.firstWhere(
         (CompanyModel c) => c.code == companyCode,
       );
-      await _local.saveSelectedCompany(company);
+      _store.saveSelectedCompany(company);
       return const Right<Failure, void>(null);
     } on StateError {
       return const Left<Failure, void>(ValidationFailure('Company not found'));
-    } on CacheException {
-      return const Left<Failure, void>(CacheFailure());
     }
   }
 
   @override
-  Future<String?> readAccessToken() => _local.readAccessToken();
-
-  Future<AuthResponseModel> _refreshAndCache({
-    UserSessionModel? fallbackUser,
+  Future<Either<Failure, UserSessionEntity>> persistWarehouse({
+    required String inventLocationId,
+    String? dataAreaId,
   }) async {
-    final String? refreshToken = await _local.readRefreshToken();
+    final String warehouse = inventLocationId.trim();
+    if (warehouse.isEmpty) {
+      return const Left<Failure, UserSessionEntity>(
+        ValidationFailure('WAREHOUSE_REQUIRED'),
+      );
+    }
+    final AuthResponseModel? session = _store.session;
+    if (session == null) {
+      return const Left<Failure, UserSessionEntity>(AuthFailure());
+    }
+    final UserSessionEntity updated = SessionWarehouseMerge.applyPick(
+      session.user.toEntity(),
+      inventLocationId: warehouse,
+      dataAreaId: dataAreaId,
+    );
+    _store.save(session.copyWith(user: UserSessionModel.fromEntity(updated)));
+    return Right<Failure, UserSessionEntity>(updated);
+  }
+
+  @override
+  Future<String?> readAccessToken() async => _store.accessToken;
+
+  /// Renews the access token inside a live session; never revives a dead one.
+  Future<AuthResponseModel> _refreshAndStore() async {
+    final AuthResponseModel? current = _store.session;
+    final String? refreshToken = current?.refreshToken;
     if (refreshToken == null) {
       throw const AuthException();
     }
     AuthResponseModel model = await _remote.refresh(refreshToken);
+    final UserSessionModel? fallbackUser = current?.user;
     if (model.user.personnelNumber.isEmpty && fallbackUser != null) {
       model = model.copyWith(user: fallbackUser);
+    } else if (fallbackUser != null) {
+      model = model.copyWith(
+        user: SessionWarehouseMerge.keepLocal(model.user, fallbackUser),
+      );
     }
-    await _local.saveSession(model);
+    _store.save(model);
     return model;
   }
 
-  Failure _map(Object error) {
-    if (error is AuthException) {
-      return AuthFailure(error.message);
-    }
-    if (error is NetworkException) {
-      return const NetworkFailure();
-    }
-    if (error is CacheException) {
-      return const CacheFailure();
-    }
-    if (error is ServerException) {
-      return ServerFailure(error.message);
-    }
-    return const ServerFailure();
-  }
+  Failure _map(Object error) => mapAuthError(error);
 }

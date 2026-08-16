@@ -19,15 +19,20 @@ class FullAddCatalogActions {
     required ResolvePriceUseCase resolvePriceUseCase,
     required GetOnHandUseCase getOnHandUseCase,
     required SubmitFullLineUseCase submitFullLineUseCase,
+    String? sessionWarehouse,
   }) : _lookupBarcodeUseCase = lookupBarcodeUseCase,
        _resolvePriceUseCase = resolvePriceUseCase,
        _getOnHandUseCase = getOnHandUseCase,
-       _submitFullLineUseCase = submitFullLineUseCase;
+       _submitFullLineUseCase = submitFullLineUseCase,
+       _sessionWarehouse = sessionWarehouse;
 
   final LookupBarcodeUseCase _lookupBarcodeUseCase;
   final ResolvePriceUseCase _resolvePriceUseCase;
   final GetOnHandUseCase _getOnHandUseCase;
   final SubmitFullLineUseCase _submitFullLineUseCase;
+
+  /// Warehouse from the signed-in session, used when the order header has none.
+  final String? _sessionWarehouse;
 
   Future<Either<Failure, BarcodeItemEntity>> lookup({
     required String barcode,
@@ -53,9 +58,12 @@ class FullAddCatalogActions {
     required BarcodeItemEntity item,
     required SalesOrderHeaderEntity order,
   }) {
+    final String warehouse = order.inventLocationId.trim().isNotEmpty
+        ? order.inventLocationId
+        : (_sessionWarehouse?.trim() ?? '');
     return _getOnHandUseCase(
       itemNumber: item.itemNumber,
-      warehouse: order.inventLocationId,
+      warehouse: warehouse,
       company: order.dataArea,
     );
   }

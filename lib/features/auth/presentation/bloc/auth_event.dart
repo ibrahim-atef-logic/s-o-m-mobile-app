@@ -46,3 +46,13 @@ final class AuthSessionExpired extends AuthEvent {
 final class AuthProfileOpened extends AuthEvent {
   const AuthProfileOpened();
 }
+
+/// Replaces the in-memory session, e.g. after the warehouse picker saves one.
+final class AuthSessionUpdated extends AuthEvent {
+  const AuthSessionUpdated(this.session);
+
+  final UserSessionEntity session;
+
+  @override
+  List<Object?> get props => <Object?>[session];
+}

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logic_retail_mobile/features/sales_orders/data/datasources/sales_orders_remote_data_source.dart';
+import 'package:logic_retail_mobile/features/sales_orders/data/models/created_order_model.dart';
 import 'package:logic_retail_mobile/features/sales_orders/data/models/sales_order_header_model.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -34,8 +35,9 @@ void main() {
       ),
     );
 
-    final List<SalesOrderHeaderModel> result =
-        await sut.getMyOrders(company: 'mm');
+    final List<SalesOrderHeaderModel> result = await sut.getMyOrders(
+      company: 'mm',
+    );
 
     expect(result, hasLength(1));
     expect(result.first.salesId, Fixtures.salesId);
@@ -77,5 +79,66 @@ void main() {
         queryParameters: <String, String>{'company': 'mm'},
       ),
     ).called(1);
+  });
+
+  test('createOrder posts company, customer, warehouse and currency', () async {
+    when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
+      (_) async => Response<dynamic>(
+        requestOptions: RequestOptions(path: ''),
+        statusCode: 201,
+        data: <String, dynamic>{
+          'success': true,
+          'data': Fixtures.sampleCreatedOrderJson,
+        },
+      ),
+    );
+
+    final CreatedOrderModel created = await sut.createOrder(
+      company: 'mm',
+      custAccount: 'MMS021',
+      inventLocationId: Fixtures.warehouse,
+      currencyCode: 'SAR',
+    );
+
+    expect(created.salesOrderNumber, Fixtures.createdSalesId);
+    expect(created.orderTakerPersonnelNumber, Fixtures.personnelNumber);
+    verify(
+      () => dio.post<dynamic>(
+        '/api/v1/sales-orders',
+        data: <String, String>{
+          'company': 'mm',
+          'custAccount': 'MMS021',
+          'inventLocationId': Fixtures.warehouse,
+          'currencyCode': 'SAR',
+        },
+      ),
+    ).called(1);
+  });
+
+  test('createOrder never sends the sales taker', () async {
+    when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
+      (_) async => Response<dynamic>(
+        requestOptions: RequestOptions(path: ''),
+        statusCode: 201,
+        data: <String, dynamic>{
+          'success': true,
+          'data': Fixtures.sampleCreatedOrderJson,
+        },
+      ),
+    );
+
+    await sut.createOrder(company: 'mm', custAccount: 'MMS021');
+
+    final Map<String, dynamic> body =
+        verify(
+              () => dio.post<dynamic>(
+                '/api/v1/sales-orders',
+                data: captureAny(named: 'data'),
+              ),
+            ).captured.single
+            as Map<String, dynamic>;
+    expect(body.containsKey('workerRecId'), isFalse);
+    expect(body.containsKey('personnelNumber'), isFalse);
+    expect(body.containsKey('inventLocationId'), isFalse);
   });
 }

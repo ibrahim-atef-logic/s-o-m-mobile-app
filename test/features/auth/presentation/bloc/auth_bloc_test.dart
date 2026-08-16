@@ -8,7 +8,6 @@ import 'package:logic_retail_mobile/features/auth/domain/entities/user_session_e
 import 'package:logic_retail_mobile/features/auth/domain/usecases/fetch_me_usecase.dart';
 import 'package:logic_retail_mobile/features/auth/domain/usecases/login_usecase.dart';
 import 'package:logic_retail_mobile/features/auth/domain/usecases/logout_usecase.dart';
-import 'package:logic_retail_mobile/features/auth/domain/usecases/restore_session_usecase.dart';
 import 'package:logic_retail_mobile/features/auth/domain/usecases/select_company_usecase.dart';
 import 'package:logic_retail_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:mocktail/mocktail.dart';
@@ -17,8 +16,6 @@ class MockLoginUseCase extends Mock implements LoginUseCase {}
 
 class MockLogoutUseCase extends Mock implements LogoutUseCase {}
 
-class MockRestoreSessionUseCase extends Mock implements RestoreSessionUseCase {}
-
 class MockSelectCompanyUseCase extends Mock implements SelectCompanyUseCase {}
 
 class MockFetchMeUseCase extends Mock implements FetchMeUseCase {}
@@ -26,7 +23,6 @@ class MockFetchMeUseCase extends Mock implements FetchMeUseCase {}
 void main() {
   late MockLoginUseCase login;
   late MockLogoutUseCase logout;
-  late MockRestoreSessionUseCase restore;
   late MockSelectCompanyUseCase selectCompany;
   late MockFetchMeUseCase fetchMe;
 
@@ -56,7 +52,6 @@ void main() {
   setUp(() {
     login = MockLoginUseCase();
     logout = MockLogoutUseCase();
-    restore = MockRestoreSessionUseCase();
     selectCompany = MockSelectCompanyUseCase();
     fetchMe = MockFetchMeUseCase();
   });
@@ -64,21 +59,15 @@ void main() {
   AuthBloc buildBloc() => AuthBloc(
     loginUseCase: login,
     logoutUseCase: logout,
-    restoreSessionUseCase: restore,
     selectCompanyUseCase: selectCompany,
     fetchMeUseCase: fetchMe,
   );
 
   blocTest<AuthBloc, AuthState>(
-    'emits unauthenticated when no session',
-    build: () {
-      when(
-        () => restore(),
-      ).thenAnswer((_) async => const Right<Failure, UserSessionEntity?>(null));
-      return buildBloc();
-    },
+    'a cold start is always signed out — no session is restored',
+    build: buildBloc,
     act: (AuthBloc bloc) => bloc.add(const AuthStarted()),
-    expect: () => <AuthState>[const AuthLoading(), const AuthUnauthenticated()],
+    expect: () => <AuthState>[const AuthUnauthenticated()],
   );
 
   blocTest<AuthBloc, AuthState>(
@@ -287,7 +276,11 @@ void main() {
       return buildBloc();
     },
     act: (AuthBloc bloc) => bloc.add(
-      const AuthLoginSubmitted(company: 'usmf', personnelNumber: 'x', password: 'y'),
+      const AuthLoginSubmitted(
+        company: 'usmf',
+        personnelNumber: 'x',
+        password: 'y',
+      ),
     ),
     expect: () => <AuthState>[
       const AuthLoading(),

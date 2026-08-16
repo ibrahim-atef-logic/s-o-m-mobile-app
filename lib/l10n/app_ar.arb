@@ -30,6 +30,19 @@
     }
   },
   "searchOrders": "بحث في الأوامر",
+  "newSalesOrder": "أمر مبيعات جديد",
+  "createOrder": "إنشاء الأمر",
+  "orderCreated": "تم إنشاء الأمر {salesId}",
+  "@orderCreated": {
+    "placeholders": {
+      "salesId": {"type": "String"}
+    }
+  },
+  "selectCustomer": "اختر العميل",
+  "searchCustomers": "بحث برقم الحساب أو الاسم",
+  "noCustomers": "لا يوجد عملاء مطابقون للبحث",
+  "errorCustomersLoadFailed": "تعذر تحميل العملاء، حاول مرة أخرى",
+  "errorCustomerRequired": "اختر العميل أولاً",
   "noOrders": "لا توجد أوامر مفتوحة",
   "noOrdersMatchSearch": "لا توجد أوامر مطابقة للبحث",
   "salesOrderDetails": "تفاصيل أمر المبيعات",
@@ -131,7 +144,14 @@
   "profileChannel": "الفرع",
   "profileCurrency": "العملة",
   "profileDefaultCustomer": "العميل الافتراضي",
-  "warehouseNotAssignedBanner": "لم يتم تعيين مستودع / Warehouse is not assigned. اختيار المستودع غير متاح حالياً / Warehouse picker is not available yet.",
+  "warehouseNotAssignedBanner": "لم يتم تعيين مستودع لحسابك. اختر مستودعاً قياسياً للمتابعة.",
+  "selectWarehouse": "اختيار المستودع",
+  "selectWarehouseHint": "اختر المستودع القياسي الذي ستعمل عليه",
+  "searchWarehouses": "بحث في المستودعات",
+  "noWarehouses": "لا توجد مستودعات قياسية متاحة لهذه الشركة",
+  "errorWarehousesLoadFailed": "تعذر تحميل المستودعات، حاول مرة أخرى",
+  "warehouseSelected": "تم تحديد المستودع",
+  "changeWarehouse": "تغيير المستودع",
   "changePassword": "تغيير كلمة المرور",
   "oldPassword": "كلمة المرور الحالية",
   "newPassword": "كلمة المرور الجديدة",

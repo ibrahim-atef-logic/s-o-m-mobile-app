@@ -93,6 +93,32 @@ class AppLocalizationsAr extends AppLocalizations {
   String get searchOrders => 'بحث في الأوامر';
 
   @override
+  String get newSalesOrder => 'أمر مبيعات جديد';
+
+  @override
+  String get createOrder => 'إنشاء الأمر';
+
+  @override
+  String orderCreated(String salesId) {
+    return 'تم إنشاء الأمر $salesId';
+  }
+
+  @override
+  String get selectCustomer => 'اختر العميل';
+
+  @override
+  String get searchCustomers => 'بحث برقم الحساب أو الاسم';
+
+  @override
+  String get noCustomers => 'لا يوجد عملاء مطابقون للبحث';
+
+  @override
+  String get errorCustomersLoadFailed => 'تعذر تحميل العملاء، حاول مرة أخرى';
+
+  @override
+  String get errorCustomerRequired => 'اختر العميل أولاً';
+
+  @override
   String get noOrders => 'لا توجد أوامر مفتوحة';
 
   @override
@@ -361,7 +387,29 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get warehouseNotAssignedBanner =>
-      'لم يتم تعيين مستودع / Warehouse is not assigned. اختيار المستودع غير متاح حالياً / Warehouse picker is not available yet.';
+      'لم يتم تعيين مستودع لحسابك. اختر مستودعاً قياسياً للمتابعة.';
+
+  @override
+  String get selectWarehouse => 'اختيار المستودع';
+
+  @override
+  String get selectWarehouseHint => 'اختر المستودع القياسي الذي ستعمل عليه';
+
+  @override
+  String get searchWarehouses => 'بحث في المستودعات';
+
+  @override
+  String get noWarehouses => 'لا توجد مستودعات قياسية متاحة لهذه الشركة';
+
+  @override
+  String get errorWarehousesLoadFailed =>
+      'تعذر تحميل المستودعات، حاول مرة أخرى';
+
+  @override
+  String get warehouseSelected => 'تم تحديد المستودع';
+
+  @override
+  String get changeWarehouse => 'تغيير المستودع';
 
   @override
   String get changePassword => 'تغيير كلمة المرور';

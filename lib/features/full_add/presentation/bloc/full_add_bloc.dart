@@ -28,11 +28,13 @@ class FullAddBloc extends Bloc<FullAddEvent, FullAddState> {
     required ResolvePriceUseCase resolvePriceUseCase,
     required GetOnHandUseCase getOnHandUseCase,
     required SubmitFullLineUseCase submitFullLineUseCase,
+    String? sessionWarehouse,
   }) : _actions = FullAddCatalogActions(
          lookupBarcodeUseCase: lookupBarcodeUseCase,
          resolvePriceUseCase: resolvePriceUseCase,
          getOnHandUseCase: getOnHandUseCase,
          submitFullLineUseCase: submitFullLineUseCase,
+         sessionWarehouse: sessionWarehouse,
        ),
        super(FullAddState(order: order)) {
     on<FullAddBarcodeChanged>(_onBarcodeChanged);

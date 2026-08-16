@@ -42,6 +42,15 @@ class ActivationCycleAdapter implements HttpClientAdapter {
     if (method == 'POST' && path.endsWith('/auth/logout')) {
       return _ok(<String, dynamic>{});
     }
+    if (method == 'GET' && path.contains('/warehouses')) {
+      return _warehouses(options.queryParameters['company']);
+    }
+    if (method == 'GET' && path.contains('/customers')) {
+      return _customers(options.queryParameters);
+    }
+    if (method == 'POST' && path.endsWith('/sales-orders')) {
+      return _createOrder(body);
+    }
     if (method == 'GET' && path.contains('/barcodes/')) {
       if (path.contains(Fixtures.unknownBarcode)) {
         return _err(404, 'BARCODE_NOT_FOUND', 'Barcode not found');
@@ -97,6 +106,62 @@ class ActivationCycleAdapter implements HttpClientAdapter {
       return _ok(Fixtures.sampleLoginDataJson);
     }
     return _err(401, 'AUTH_FAILED', 'Invalid personnel or password');
+  }
+
+  ResponseBody _warehouses(Object? company) {
+    final String code = (company ?? '').toString().trim();
+    if (code.isEmpty) {
+      return _err(400, 'VALIDATION_ERROR', 'company is required');
+    }
+    if (code == Fixtures.loginCompany) {
+      return _err(403, 'FORBIDDEN_COMPANY', 'Company not allowed for token');
+    }
+    if (code.toLowerCase() == 'pltr') {
+      return _ok(Fixtures.samplePltrWarehousesJson);
+    }
+    return _ok(Fixtures.sampleWarehousesJson);
+  }
+
+  ResponseBody _customers(Map<String, dynamic> query) {
+    final String company = (query['company'] ?? '').toString().trim();
+    if (company.isEmpty) {
+      return _err(400, 'VALIDATION_ERROR', 'company is required');
+    }
+    if (company == Fixtures.loginCompany) {
+      return _err(403, 'FORBIDDEN_COMPANY', 'Company not allowed for token');
+    }
+    final String search = (query['search'] ?? '')
+        .toString()
+        .trim()
+        .toLowerCase();
+    return _ok(<Map<String, dynamic>>[
+      for (final Map<String, dynamic> row in Fixtures.sampleCustomersJson)
+        if (search.isEmpty ||
+            '${row['customerAccount']}'.toLowerCase().contains(search) ||
+            '${row['name']}'.toLowerCase().contains(search))
+          row,
+    ]);
+  }
+
+  ResponseBody _createOrder(Map<String, dynamic> body) {
+    final String company = (body['company'] ?? '').toString().trim();
+    final String customer = (body['custAccount'] ?? '').toString().trim();
+    final String warehouse = (body['inventLocationId'] ?? '').toString().trim();
+    if (company == Fixtures.loginCompany) {
+      return _err(403, 'FORBIDDEN_COMPANY', 'Company not allowed for token');
+    }
+    if (customer.isEmpty) {
+      return _err(400, 'VALIDATION_ERROR', 'custAccount is required');
+    }
+    if (warehouse.isEmpty) {
+      return _err(400, 'WAREHOUSE_REQUIRED', 'No warehouse for this user');
+    }
+    return _ok(<String, dynamic>{
+      ...Fixtures.sampleCreatedOrderJson,
+      'dataAreaId': company,
+      'custAccount': customer,
+      'inventLocationId': warehouse,
+    });
   }
 
   Map<String, dynamic> _body(Object? data) {

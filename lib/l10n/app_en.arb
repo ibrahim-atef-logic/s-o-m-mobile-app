@@ -30,6 +30,19 @@
     }
   },
   "searchOrders": "Search orders",
+  "newSalesOrder": "New sales order",
+  "createOrder": "Create order",
+  "orderCreated": "Order {salesId} created",
+  "@orderCreated": {
+    "placeholders": {
+      "salesId": {"type": "String"}
+    }
+  },
+  "selectCustomer": "Select customer",
+  "searchCustomers": "Search by account or name",
+  "noCustomers": "No customers match this search",
+  "errorCustomersLoadFailed": "Could not load customers, please try again",
+  "errorCustomerRequired": "Select a customer first",
   "noOrders": "No open sales orders",
   "noOrdersMatchSearch": "No orders match your search",
   "salesOrderDetails": "Sales order details",
@@ -131,7 +144,14 @@
   "profileChannel": "Branch",
   "profileCurrency": "Currency",
   "profileDefaultCustomer": "Default customer",
-  "warehouseNotAssignedBanner": "Warehouse is not assigned / لم يتم تعيين مستودع. Warehouse picker is not available yet / اختيار المستودع غير متاح حالياً.",
+  "warehouseNotAssignedBanner": "No warehouse is assigned to your account. Select a standard warehouse to continue.",
+  "selectWarehouse": "Select warehouse",
+  "selectWarehouseHint": "Choose the standard warehouse you work with",
+  "searchWarehouses": "Search warehouses",
+  "noWarehouses": "No standard warehouses are available for this company",
+  "errorWarehousesLoadFailed": "Could not load warehouses, please try again",
+  "warehouseSelected": "Warehouse selected",
+  "changeWarehouse": "Change warehouse",
   "changePassword": "Change password",
   "oldPassword": "Current password",
   "newPassword": "New password",

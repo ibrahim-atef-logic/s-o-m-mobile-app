@@ -11,6 +11,7 @@ import '../../../../core/widgets/states/app_error_view.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/domain/entities/user_session_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../domain/entities/sales_order_header_entity.dart';
 import '../bloc/sales_orders_bloc.dart';
 import '../widgets/orders_list_body.dart';
 import '../widgets/warehouse_missing_banner.dart';
@@ -45,6 +46,16 @@ class _MySalesOrdersPageState extends State<MySalesOrdersPage> {
   UserSessionEntity? get _session {
     final AuthState auth = context.read<AuthBloc>().state;
     return auth is AuthAuthenticated ? auth.session : null;
+  }
+
+  Future<void> _createOrder() async {
+    final SalesOrderHeaderEntity? created = await context
+        .push<SalesOrderHeaderEntity>('/orders/new');
+    if (!mounted || created == null) {
+      return;
+    }
+    setState(_load);
+    await context.push('/orders/${created.salesId}', extra: created);
   }
 
   @override
@@ -99,6 +110,15 @@ class _MySalesOrdersPageState extends State<MySalesOrdersPage> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: Semantics(
+        label: l10n.newSalesOrder,
+        button: true,
+        child: FloatingActionButton(
+          tooltip: l10n.newSalesOrder,
+          onPressed: _createOrder,
+          child: const Icon(Icons.add),
+        ),
       ),
       body: Column(
         children: <Widget>[

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logic_retail_mobile/core/locale/locale_cubit.dart';
@@ -65,12 +66,14 @@ void main() {
         ),
       ),
     );
-    when(() => authBloc.stream).thenAnswer((_) => const Stream<AuthState>.empty());
+    when(
+      () => authBloc.stream,
+    ).thenAnswer((_) => const Stream<AuthState>.empty());
     when(authBloc.close).thenAnswer((_) async {});
 
-    when(() => salesBloc.state).thenReturn(
-      const SalesOrdersLoaded(<SalesOrderHeaderEntity>[order]),
-    );
+    when(
+      () => salesBloc.state,
+    ).thenReturn(const SalesOrdersLoaded(<SalesOrderHeaderEntity>[order]));
     when(() => salesBloc.stream).thenAnswer(
       (_) => Stream<SalesOrdersState>.value(
         const SalesOrdersLoaded(<SalesOrderHeaderEntity>[order]),
@@ -99,6 +102,27 @@ void main() {
     expect(find.text(Fixtures.salesId), findsOneWidget);
   });
 
+  testWidgets('offers a new sales order action', (WidgetTester tester) async {
+    await pumpTestApp(
+      tester,
+      providers: <BlocProvider<dynamic>>[
+        BlocProvider<AuthBloc>.value(value: authBloc),
+        BlocProvider<SalesOrdersBloc>.value(value: salesBloc),
+        BlocProvider<LocaleCubit>.value(value: localeCubit),
+      ],
+      home: const MySalesOrdersPage(),
+    );
+    await tester.pumpAndSettle();
+
+    final Finder fab = find.byType(FloatingActionButton);
+    expect(fab, findsOneWidget);
+    expect(
+      find.descendant(of: fab, matching: find.byIcon(Icons.add)),
+      findsOneWidget,
+    );
+    expect(find.bySemanticsLabel('New sales order'), findsWidgets);
+  });
+
   testWidgets('incomplete warehouse session still loads home with banner', (
     WidgetTester tester,
   ) async {
@@ -116,9 +140,9 @@ void main() {
         ),
       ),
     );
-    when(() => salesBloc.state).thenReturn(
-      const SalesOrdersLoaded(<SalesOrderHeaderEntity>[]),
-    );
+    when(
+      () => salesBloc.state,
+    ).thenReturn(const SalesOrdersLoaded(<SalesOrderHeaderEntity>[]));
 
     await pumpTestApp(
       tester,
@@ -131,7 +155,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Warehouse is not assigned'), findsOneWidget);
+    expect(find.textContaining('No warehouse is assigned'), findsOneWidget);
     verify(() => salesBloc.add(const SalesOrdersRequested('PLTR'))).called(1);
   });
 }

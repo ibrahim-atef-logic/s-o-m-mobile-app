@@ -15,8 +15,6 @@ abstract class AuthRepository {
 
   Future<Either<Failure, void>> logout();
 
-  Future<Either<Failure, UserSessionEntity?>> restoreSession();
-
   Future<Either<Failure, UserSessionEntity>> fetchMe();
 
   Future<Either<Failure, String>> changePassword({
@@ -25,6 +23,13 @@ abstract class AuthRepository {
   });
 
   Future<Either<Failure, void>> persistSelectedCompany(String companyCode);
+
+  /// Writes the picked warehouse into the in-memory session and clears
+  /// `needsWarehouseSelection`.
+  Future<Either<Failure, UserSessionEntity>> persistWarehouse({
+    required String inventLocationId,
+    String? dataAreaId,
+  });
 
   Future<String?> readAccessToken();
 }
