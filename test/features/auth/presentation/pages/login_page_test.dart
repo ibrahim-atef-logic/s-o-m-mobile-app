@@ -4,9 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logic_retail_mobile/core/error/failures.dart';
+import 'package:logic_retail_mobile/core/locale/locale_cubit.dart';
+import 'package:logic_retail_mobile/core/locale/locale_repository.dart';
 import 'package:logic_retail_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:logic_retail_mobile/features/auth/presentation/pages/login_page.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../helpers/test_app.dart';
 
@@ -17,6 +20,7 @@ void main() {
 
   late MockAuthBloc authBloc;
   late StreamController<AuthState> states;
+  late LocaleCubit localeCubit;
 
   setUpAll(() {
     registerFallbackValue(
@@ -28,7 +32,10 @@ void main() {
     );
   });
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    localeCubit = LocaleCubit(LocaleRepository(prefs));
     authBloc = MockAuthBloc();
     states = StreamController<AuthState>.broadcast();
     when(() => authBloc.state).thenReturn(const AuthUnauthenticated());
@@ -38,6 +45,7 @@ void main() {
   });
 
   tearDown(() async {
+    await localeCubit.close();
     await states.close();
   });
 
@@ -46,13 +54,27 @@ void main() {
       tester,
       providers: <BlocProvider<dynamic>>[
         BlocProvider<AuthBloc>.value(value: authBloc),
+        BlocProvider<LocaleCubit>.value(value: localeCubit),
       ],
       home: const LoginPage(),
     );
     await tester.pumpAndSettle();
   }
 
-  testWidgets('empty submit shows validation messages', (WidgetTester tester) async {
+  testWidgets('renders branded welcome copy', (WidgetTester tester) async {
+    await pumpLogin(tester);
+
+    expect(find.text('Welcome back'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+    expect(
+      find.text('Encrypted connection · credentials stay on this device'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('empty submit shows validation messages', (
+    WidgetTester tester,
+  ) async {
     await pumpLogin(tester);
     await tester.tap(find.text('Login'));
     await tester.pumpAndSettle();
@@ -63,7 +85,9 @@ void main() {
     verifyNever(() => authBloc.add(any()));
   });
 
-  testWidgets('filled form dispatches AuthLoginSubmitted', (WidgetTester tester) async {
+  testWidgets('filled form dispatches AuthLoginSubmitted', (
+    WidgetTester tester,
+  ) async {
     await pumpLogin(tester);
 
     final Finder fields = find.byType(TextFormField);
@@ -84,7 +108,9 @@ void main() {
     ).called(1);
   });
 
-  testWidgets('accepts string personnel number like m.afif', (WidgetTester tester) async {
+  testWidgets('accepts string personnel number like m.afif', (
+    WidgetTester tester,
+  ) async {
     await pumpLogin(tester);
 
     final Finder fields = find.byType(TextFormField);

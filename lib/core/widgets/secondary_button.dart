@@ -27,10 +27,10 @@ class SecondaryButton extends StatelessWidget {
         onPressed: isLoading ? null : onPressed,
         child: isLoading
             ? const SizedBox(
-                height: 22,
-                width: 22,
+                height: AppDimensions.spinnerMd,
+                width: AppDimensions.spinnerMd,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
+                  strokeWidth: AppDimensions.spinnerStroke,
                   color: AppColors.primary,
                 ),
               )

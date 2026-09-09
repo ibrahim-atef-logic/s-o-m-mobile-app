@@ -16,7 +16,6 @@ void main() {
 
   setUpAll(() async {
     client = LiveApiClient();
-    // Unauthenticated probe: an existing route answers 401, a missing one 404.
     final Response<dynamic> probe = await client.dio.get<dynamic>(
       '/api/v1/customers',
       queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
@@ -37,6 +36,7 @@ void main() {
     String? company = Fixtures.legalEntity,
     String? search,
     int? top,
+    int? skip,
   }) {
     return client.dio.get<dynamic>(
       '/api/v1/customers',
@@ -44,6 +44,7 @@ void main() {
         'company': ?company,
         'search': ?search,
         'top': ?top,
+        'skip': ?skip,
       },
       options: Options(headers: client.authHeader()),
     );
@@ -51,24 +52,46 @@ void main() {
 
   List<Map<String, dynamic>> rowsOf(Response<dynamic> res) {
     final Map<String, dynamic> body = res.data as Map<String, dynamic>;
-    return (body['data'] as List<dynamic>)
-        .whereType<Map<String, dynamic>>()
-        .toList();
+    final Object? data = body['data'];
+    if (data is List<dynamic>) {
+      return data.whereType<Map<String, dynamic>>().toList();
+    }
+    if (data is Map<String, dynamic>) {
+      final Object? items = data['items'] ?? data['Items'];
+      if (items is List<dynamic>) {
+        return items.whereType<Map<String, dynamic>>().toList();
+      }
+    }
+    return <Map<String, dynamic>>[];
   }
 
-  test('E2E-C1 browsing returns at most top rows with the fields we map', () async {
-    if (skipWhenMissing()) return;
-
-    final Response<dynamic> res = await customers(top: 5);
-    expect(res.statusCode, 200);
-    final List<Map<String, dynamic>> rows = rowsOf(res);
-    expect(rows, isNotEmpty);
-    expect(rows.length, lessThanOrEqualTo(5));
-    for (final Map<String, dynamic> row in rows) {
-      expect('${row['dataAreaId']}', Fixtures.legalEntity);
-      expect('${row['customerAccount']}'.trim(), isNotEmpty);
+  int? totalCountOf(Response<dynamic> res) {
+    final Object? data = (res.data as Map<String, dynamic>)['data'];
+    if (data is Map<String, dynamic>) {
+      final Object? total = data['totalCount'];
+      if (total is int) {
+        return total;
+      }
     }
-  });
+    return null;
+  }
+
+  test(
+    'E2E-C1 browsing returns at most top rows with the fields we map',
+    () async {
+      if (skipWhenMissing()) return;
+
+      final Response<dynamic> res = await customers(top: 5);
+      expect(res.statusCode, 200);
+      final List<Map<String, dynamic>> rows = rowsOf(res);
+      expect(rows, isNotEmpty);
+      expect(rows.length, lessThanOrEqualTo(5));
+      for (final Map<String, dynamic> row in rows) {
+        expect('${row['dataAreaId']}', Fixtures.legalEntity);
+        expect('${row['customerAccount']}'.trim(), isNotEmpty);
+      }
+    },
+  );
 
   test('E2E-C2 top is clamped to the backend maximum of 200', () async {
     if (skipWhenMissing()) return;
@@ -94,15 +117,21 @@ void main() {
     );
   });
 
-  test('E2E-C4 a partial term is answered with an empty list, not an error', () async {
+  test('E2E-C4 Arabic name search returns matches with totalCount', () async {
     if (skipWhenMissing()) return;
 
-    // D365 F&O OData rejects contains/startswith, so the backend can only match
-    // a full account number until the X++ search action ships. The picker copy
-    // says "full account number" for exactly this reason.
-    final Response<dynamic> res = await customers(search: 'MMS0');
+    final Response<dynamic> res = await customers(search: 'الشرقية');
     expect(res.statusCode, 200);
-    expect(rowsOf(res), isEmpty);
+    final List<Map<String, dynamic>> rows = rowsOf(res);
+    expect(rows, isNotEmpty);
+    expect(
+      rows.any(
+        (Map<String, dynamic> r) => '${r['name']}'.contains('الشرقية'),
+      ),
+      isTrue,
+    );
+    expect(totalCountOf(res), isNotNull);
+    expect(totalCountOf(res)!, greaterThanOrEqualTo(rows.length));
   });
 
   test('E2E-C5 the login registry key is rejected as a company', () async {

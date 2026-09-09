@@ -25,16 +25,21 @@ class CompanyTileSkeleton extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                ShimmerBox(width: 140, height: 16),
+                ShimmerBox(
+                  width: AppDimensions.shimmerTitleWidth,
+                  height: AppDimensions.iconSm,
+                ),
                 SizedBox(height: AppDimensions.spaceSm),
-                ShimmerBox(width: 72, height: 12),
+                ShimmerBox(width: 72, height: AppDimensions.shimmerLineSm),
               ],
             ),
           ),
           ShimmerBox(
-            width: 24,
-            height: 24,
-            borderRadius: BorderRadius.all(Radius.circular(12)),
+            width: AppDimensions.iconMd,
+            height: AppDimensions.iconMd,
+            borderRadius: BorderRadius.all(
+              Radius.circular(AppDimensions.radiusMd),
+            ),
           ),
         ],
       ),

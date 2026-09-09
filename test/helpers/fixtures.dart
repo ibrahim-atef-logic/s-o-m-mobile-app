@@ -3,7 +3,7 @@ abstract final class Fixtures {
   static const String e2eBaseUrl = 'https://salesorderapp.logictec.online';
   static const String loginCompany = 'logic-trial';
   static const String personnelNumber = '1006';
-  static const String password = '123';
+  static const String password = '1234';
   static const String legalEntity = 'mm';
   static const String barcode = '6287007961754';
   static const String itemNumber = 'BG410.003';
@@ -25,12 +25,18 @@ abstract final class Fixtures {
     'salesId': salesId,
     'custAccount': custAccount,
     'salesName': 'Trial Customer',
+    'custDisplayName': 'عميل نقدي ميرا مارت جدة 01',
     'dataArea': legalEntity,
     'priceGroupId': 'RETAIL',
     'inventLocationId': warehouse,
+    'inventLocationName': 'Main warehouse',
     'inventSiteId': 'MM',
     'salesStatus': 'Backorder',
     'documentStatus': 'None',
+    'salesStatusLabel': 'طلب معلق',
+    'documentStatusLabel': 'بدون مستند',
+    'lineCount': 3,
+    'orderTotal': 210.0,
     'createdDateTime': '2025-01-01T00:00:00Z',
   };
 
@@ -42,16 +48,25 @@ abstract final class Fixtures {
     'salesQty': 2,
     'salesUnit': 'pcs',
     'lineNum': 1,
+    'unitPrice': 12.5,
+    'netAmount': 25.0,
     'dataArea': legalEntity,
   };
 
   static const Map<String, dynamic> samplePriceJson = <String, dynamic>{
-    'itemNumber': '  BG410.003  ',
-    'price': 12.5,
-    'unitId': 'pcs',
-    'customerAccountNumber': custAccount,
-    'priceCustomerGroupCode': 'RETAIL',
-    'dataArea': legalEntity,
+    'itemId': '  BG410.003  ',
+    'found': true,
+    'finalPrice': 12.5,
+    'price': 15.0,
+    'priceUnit': 1.0,
+    'markup': 0.0,
+    'lineDisc': 2.5,
+    'currency': 'SAR',
+    'warehouseId': warehouse,
+    'channelRecId': 5637152827,
+    'priceGroupId': 'RETAIL',
+    'source': 'PriceGroup',
+    'salesUnit': 'pcs',
   };
 
   static const Map<String, dynamic> sampleInventoryJson = <String, dynamic>{
@@ -151,8 +166,12 @@ abstract final class Fixtures {
         'companies': <Map<String, dynamic>>[
           <String, dynamic>{'code': 'mm', 'name': 'mm', 'groupId': null},
         ],
+        'displayCompanyName': 'تجزئة هايبر ماركت',
+        'displayWarehouseName': 'MMS000WH',
+        'activeWarehouseName': 'Main warehouse',
         'retailChannelTableRecId': 5637152827,
         'retailChannelId': '912',
+        'retailChannelName': 'سلة المواد الغذائية المخفضة',
         'channelType': 4,
         'inventLocation': 'MMS000WH',
         'inventLocationDataAreaId': 'mm',

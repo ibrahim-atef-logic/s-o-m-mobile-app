@@ -29,7 +29,7 @@ flutter run
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000
 ```
 
-Trial login: company `logic-trial` / personnel `1006` / password `123`
+Trial login: company `logic-trial` / personnel `1006` / password `1234`
 
 ## Tests
 

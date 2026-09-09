@@ -26,11 +26,11 @@ void main() {
     expect(redirect(state, '/profile'), isNull);
   });
 
-  test('12344 is held on the picker until a warehouse is stored', () {
+  test('12344 goes home after login; warehouse is chosen on create-order', () {
     final AuthState blocked = AuthAuthenticated(user12344);
 
-    expect(redirect(blocked, '/login'), kWarehouseGateRoute);
-    expect(redirect(blocked, '/orders'), kWarehouseGateRoute);
+    expect(redirect(blocked, '/login'), '/orders');
+    expect(redirect(blocked, '/orders'), isNull);
     expect(redirect(blocked, kWarehouseGateRoute), isNull);
 
     final AuthState picked = AuthAuthenticated(

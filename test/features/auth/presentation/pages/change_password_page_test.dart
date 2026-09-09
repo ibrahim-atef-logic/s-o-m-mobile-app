@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:logic_retail_mobile/core/error/failures.dart';
 import 'package:logic_retail_mobile/features/auth/domain/usecases/change_password_usecase.dart';
 import 'package:logic_retail_mobile/features/auth/presentation/cubit/change_password_cubit.dart';
 import 'package:logic_retail_mobile/features/auth/presentation/pages/change_password_page.dart';
@@ -74,5 +76,35 @@ void main() {
         confirmPassword: any(named: 'confirmPassword'),
       ),
     );
+  });
+
+  testWidgets('success snackbar uses localized copy not D365 message', (
+    WidgetTester tester,
+  ) async {
+    when(
+      () => useCase(
+        oldPassword: any(named: 'oldPassword'),
+        newPassword: any(named: 'newPassword'),
+        confirmPassword: any(named: 'confirmPassword'),
+      ),
+    ).thenAnswer(
+      (_) async => const Right<Failure, String>(
+        'DYNAMICS: Password for user 1006 was updated in SysUserInfo.',
+      ),
+    );
+
+    await pumpPage(tester);
+    final Finder fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'old');
+    await tester.enterText(fields.at(1), 'newPass1');
+    await tester.enterText(fields.at(2), 'newPass1');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Your password was updated successfully.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('SysUserInfo'), findsNothing);
   });
 }

@@ -5,43 +5,44 @@ import '../helpers/fixtures.dart';
 /// Live API helpers for tagged e2e tests.
 class LiveApiClient {
   LiveApiClient({Dio? dio})
-      : dio = dio ??
-            Dio(
-              BaseOptions(
-                baseUrl: const String.fromEnvironment(
-                  'API_BASE_URL',
-                  defaultValue: Fixtures.e2eBaseUrl,
-                ),
-                connectTimeout: const Duration(seconds: 30),
-                receiveTimeout: const Duration(seconds: 30),
-                headers: <String, Object?>{'Content-Type': 'application/json'},
-                validateStatus: (_) => true,
+    : dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              baseUrl: const String.fromEnvironment(
+                'API_BASE_URL',
+                defaultValue: Fixtures.e2eBaseUrl,
               ),
-            );
+              connectTimeout: const Duration(seconds: 30),
+              receiveTimeout: const Duration(seconds: 30),
+              headers: <String, Object?>{'Content-Type': 'application/json'},
+              validateStatus: (_) => true,
+            ),
+          );
 
   final Dio dio;
 
   String? accessToken;
 
   static String get company => const String.fromEnvironment(
-        'E2E_COMPANY',
-        defaultValue: Fixtures.loginCompany,
-      );
+    'E2E_COMPANY',
+    defaultValue: Fixtures.loginCompany,
+  );
 
   static String get personnel => const String.fromEnvironment(
-        'E2E_PERSONNEL',
-        defaultValue: Fixtures.personnelNumber,
-      );
+    'E2E_PERSONNEL',
+    defaultValue: Fixtures.personnelNumber,
+  );
 
   static String get password => const String.fromEnvironment(
-        'E2E_PASSWORD',
-        defaultValue: Fixtures.password,
-      );
+    'E2E_PASSWORD',
+    defaultValue: Fixtures.password,
+  );
 
   static String get legalEntity => const String.fromEnvironment(
-        'E2E_LEGAL_ENTITY',
-        defaultValue: Fixtures.legalEntity,
-      );
+    'E2E_LEGAL_ENTITY',
+    defaultValue: Fixtures.legalEntity,
+  );
 
   static bool get enableWrite =>
       const String.fromEnvironment('ENABLE_WRITE_E2E', defaultValue: 'false') ==

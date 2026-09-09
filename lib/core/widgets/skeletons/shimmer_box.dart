@@ -8,7 +8,7 @@ import '../../theme/app_dimensions.dart';
 class ShimmerBox extends StatelessWidget {
   const ShimmerBox({
     this.width,
-    this.height = 14,
+    this.height = AppDimensions.shimmerLineMd,
     this.borderRadius,
     super.key,
   });

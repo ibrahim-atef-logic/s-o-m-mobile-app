@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../extensions/theme_context.dart';
 import '../theme/app_dimensions.dart';
-import '../theme/app_text_styles.dart';
 
 /// Label / value row for order details and cart summaries.
 class KeyValueRow extends StatelessWidget {
@@ -23,13 +23,25 @@ class KeyValueRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Expanded(flex: 2, child: Text(label, style: AppTextStyles.bodySm)),
           Expanded(
-            flex: 3,
+            flex: AppDimensions.kvLabelFlex,
+            child: Text(
+              label,
+              style: context.textTheme.bodySmall,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Expanded(
+            flex: AppDimensions.kvValueFlex,
             child: Text(
               value,
-              style: numeric ? AppTextStyles.numeric : AppTextStyles.body,
+              style: numeric
+                  ? context.numericStyle
+                  : context.textTheme.bodyMedium,
               textAlign: TextAlign.end,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

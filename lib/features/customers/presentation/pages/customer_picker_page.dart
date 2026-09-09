@@ -3,10 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/extensions/theme_context.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/l10n/failure_l10n.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_gradients.dart';
+import '../../../../core/widgets/app_gradient_app_bar.dart';
+import '../../../../core/widgets/app_search_field.dart';
 import '../../../../core/widgets/skeletons/company_tile_skeleton.dart';
 import '../../../../core/widgets/skeletons/list_skeleton.dart';
 import '../../../../core/widgets/states/app_error_view.dart';
@@ -14,6 +18,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/customer_entity.dart';
 import '../cubit/customer_picker_cubit.dart';
 import '../widgets/customer_list_body.dart';
+import '../widgets/customer_search_summary.dart';
 
 /// Searchable customer list; pops the picked [CustomerEntity].
 class CustomerPickerPage extends StatelessWidget {
@@ -48,25 +53,38 @@ class _CustomerPickerView extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppGradientAppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(l10n.selectCustomer),
-            Text(company, style: AppTextStyles.bodySm),
+            Text(
+              company,
+              style: context.textTheme.labelSmall?.copyWith(
+                color: AppColors.textInverse.withValues(alpha: 0.82),
+              ),
+            ),
           ],
         ),
       ),
       body: Column(
         children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(AppDimensions.spaceMd),
-            child: TextField(
-              autofocus: true,
-              decoration: InputDecoration(
-                labelText: l10n.searchCustomers,
-                prefixIcon: const Icon(Icons.search),
+          Container(
+            decoration: const BoxDecoration(
+              gradient: AppGradients.brand,
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(AppDimensions.radius2Xl),
               ),
+            ),
+            padding: const EdgeInsets.fromLTRB(
+              AppDimensions.spaceMd,
+              AppDimensions.spaceSm,
+              AppDimensions.spaceMd,
+              AppDimensions.spaceMd,
+            ),
+            child: AppSearchField(
+              autofocus: true,
+              hintText: l10n.searchCustomers,
               onChanged: (String value) =>
                   context.read<CustomerPickerCubit>().search(value),
             ),
@@ -98,10 +116,18 @@ class _CustomerPickerView extends StatelessWidget {
     return Column(
       children: <Widget>[
         if (state.searching) const LinearProgressIndicator(),
+        if (state.totalCount != null)
+          CustomerSearchSummary(
+            query: state.query,
+            totalCount: state.totalCount!,
+          ),
         Expanded(
           child: CustomerListBody(
             customers: state.customers,
             selectedAccount: selectedAccount,
+            hasMore: state.hasMore,
+            loadingMore: state.loadingMore,
+            onLoadMore: () => context.read<CustomerPickerCubit>().loadMore(),
             onSelected: (CustomerEntity customer) =>
                 context.pop<CustomerEntity>(customer),
           ),

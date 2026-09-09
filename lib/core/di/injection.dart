@@ -1,15 +1,11 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:get_it/get_it.dart';
-import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
 import '../../features/auth/data/datasources/auth_session_store.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/auth/domain/entities/auth_tokens_entity.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/change_password_usecase.dart';
 import '../../features/auth/domain/usecases/fetch_me_usecase.dart';
@@ -25,6 +21,7 @@ import '../../features/catalog/domain/repositories/catalog_repository.dart';
 import '../../features/catalog/domain/usecases/get_failed_lines_usecase.dart';
 import '../../features/catalog/domain/usecases/get_on_hand_usecase.dart';
 import '../../features/catalog/domain/usecases/lookup_barcode_usecase.dart';
+import '../../features/catalog/domain/usecases/lookup_item_usecase.dart';
 import '../../features/catalog/domain/usecases/resolve_price_usecase.dart';
 import '../../features/catalog/domain/usecases/submit_full_line_usecase.dart';
 import '../../features/catalog/domain/usecases/submit_quick_batch_usecase.dart';
@@ -41,9 +38,11 @@ import '../../features/sales_orders/data/repositories/sales_orders_repository_im
 import '../../features/sales_orders/domain/entities/sales_order_header_entity.dart';
 import '../../features/sales_orders/domain/repositories/sales_orders_repository.dart';
 import '../../features/sales_orders/domain/usecases/create_sales_order_usecase.dart';
+import '../../features/sales_orders/domain/usecases/delete_sales_order_line_usecase.dart';
 import '../../features/sales_orders/domain/usecases/get_my_sales_orders_usecase.dart';
 import '../../features/sales_orders/domain/usecases/get_sales_order_lines_usecase.dart';
 import '../../features/sales_orders/domain/usecases/get_sales_order_usecase.dart';
+import '../../features/sales_orders/domain/usecases/refresh_sales_order_usecase.dart';
 import '../../features/sales_orders/presentation/bloc/sales_orders_bloc.dart';
 import '../../features/sales_orders/presentation/cubit/create_order_cubit.dart';
 import '../../features/so_lines/presentation/cubit/so_lines_cubit.dart';
@@ -55,11 +54,11 @@ import '../../features/warehouses/presentation/cubit/warehouse_picker_cubit.dart
 import '../auth/auth_session_controller.dart';
 import '../auth/stored_session_wipe.dart';
 import '../constants/app_constants.dart';
-import '../error/failures.dart';
 import '../locale/locale_cubit.dart';
 import '../locale/locale_repository.dart';
-import '../network/auth_interceptor.dart';
-import '../network/error_interceptor.dart';
+import '../scanner/hardware_scanner_service.dart';
+import '../scanner/honeywell_hardware_scanner_service.dart';
+import 'dio_interceptors.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -137,7 +136,9 @@ Future<void> configureDependencies() async {
     )
     ..registerLazySingleton(() => GetMySalesOrdersUseCase(sl()))
     ..registerLazySingleton(() => GetSalesOrderUseCase(sl()))
+    ..registerLazySingleton(() => RefreshSalesOrderUseCase(sl()))
     ..registerLazySingleton(() => GetSalesOrderLinesUseCase(sl()))
+    ..registerLazySingleton(() => DeleteSalesOrderLineUseCase(sl()))
     ..registerLazySingleton(() => CreateSalesOrderUseCase(sl()))
     ..registerFactory(() => SalesOrdersBloc(getMySalesOrdersUseCase: sl()))
     ..registerFactory(
@@ -147,7 +148,12 @@ Future<void> configureDependencies() async {
         searchCustomersUseCase: sl(),
       ),
     )
-    ..registerFactory(() => SoLinesCubit(getSalesOrderLinesUseCase: sl()))
+    ..registerFactory(
+      () => SoLinesCubit(
+        getSalesOrderLinesUseCase: sl(),
+        deleteSalesOrderLineUseCase: sl(),
+      ),
+    )
     ..registerLazySingleton<CatalogRemoteDataSource>(
       () => CatalogRemoteDataSourceImpl(sl()),
     )
@@ -155,42 +161,38 @@ Future<void> configureDependencies() async {
       () => CatalogRepositoryImpl(sl()),
     )
     ..registerLazySingleton(() => LookupBarcodeUseCase(sl()))
+    ..registerLazySingleton(() => LookupItemUseCase(sl()))
     ..registerLazySingleton(() => ResolvePriceUseCase(sl()))
     ..registerLazySingleton(() => GetOnHandUseCase(sl()))
     ..registerLazySingleton(() => SubmitFullLineUseCase(sl()))
     ..registerLazySingleton(() => SubmitQuickBatchUseCase(sl()))
     ..registerLazySingleton(() => GetFailedLinesUseCase(sl()))
-    ..registerFactoryParam<FullAddBloc, SalesOrderHeaderEntity, String?>(
-      (SalesOrderHeaderEntity order, String? sessionWarehouse) => FullAddBloc(
+    ..registerFactoryParam<FullAddBloc, SalesOrderHeaderEntity, String?>((
+      SalesOrderHeaderEntity order,
+      String? sessionWarehouse,
+    ) {
+      final AuthSessionStore store = sl<AuthSessionStore>();
+      return FullAddBloc(
         order: order,
         lookupBarcodeUseCase: sl(),
+        lookupItemUseCase: sl(),
         resolvePriceUseCase: sl(),
         getOnHandUseCase: sl(),
         submitFullLineUseCase: sl(),
+        submitQuickBatchUseCase: sl(),
         sessionWarehouse: sessionWarehouse,
-      ),
-    )
+        sessionChannelRecId: store.session?.user.retailChannelTableRecId,
+        sessionCurrency: store.session?.user.currency,
+      );
+    })
     ..registerFactoryParam<QuickAddBloc, SalesOrderHeaderEntity, void>(
       (SalesOrderHeaderEntity order, _) =>
           QuickAddBloc(order: order, submitQuickBatchUseCase: sl()),
     )
-    ..registerFactory(() => FailedLinesCubit(getFailedLinesUseCase: sl()));
+    ..registerFactory(() => FailedLinesCubit(getFailedLinesUseCase: sl()))
+    ..registerLazySingleton<HardwareScannerService>(
+      HoneywellHardwareScannerService.new,
+    );
 
-  dio.interceptors.addAll(<Interceptor>[
-    AuthInterceptor(
-      tokenReader: () async => sl<AuthSessionStore>().accessToken,
-      onRefresh: () async {
-        final Either<Failure, AuthTokensEntity> result =
-            await sl<AuthRepository>().refresh();
-        return result.isRight();
-      },
-      onRefreshFailed: () {
-        sl<AuthSessionStore>().clear();
-        sl<AuthSessionController>().notifyExpired();
-      },
-      dio: dio,
-    ),
-    ErrorInterceptor(),
-    if (kDebugMode) PrettyDioLogger(requestBody: true, responseBody: true),
-  ]);
+  attachDioInterceptors(dio);
 }

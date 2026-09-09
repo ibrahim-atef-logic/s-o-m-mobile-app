@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../extensions/theme_context.dart';
 import '../theme/app_dimensions.dart';
-import '../theme/app_text_styles.dart';
 
 /// Small group heading above a section of content.
 class SectionLabel extends StatelessWidget {
@@ -18,7 +18,7 @@ class SectionLabel extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: AppTextStyles.label.copyWith(letterSpacing: 0.4),
+        style: context.textTheme.labelLarge?.copyWith(letterSpacing: 0.4),
       ),
     );
   }

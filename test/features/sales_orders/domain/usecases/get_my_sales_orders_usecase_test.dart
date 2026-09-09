@@ -25,15 +25,45 @@ void main() {
     verifyNever(() => repo.getMyOrders(company: any(named: 'company')));
   });
 
-  test('returns orders from repository', () async {
+  test('returns orders from repository, sorted', () async {
+    const SalesOrderHeaderEntity older = SalesOrderHeaderEntity(
+      salesId: 'MM-1',
+      custAccount: 'C',
+      salesName: 'N',
+      dataArea: 'usmf',
+      priceGroupId: '',
+      inventLocationId: '',
+      inventSiteId: '',
+      salesStatus: '',
+      documentStatus: '',
+      createdDateTime: '2026-01-01T00:00:00Z',
+    );
+    const SalesOrderHeaderEntity newer = SalesOrderHeaderEntity(
+      salesId: 'MM-2',
+      custAccount: 'C',
+      salesName: 'N',
+      dataArea: 'usmf',
+      priceGroupId: '',
+      inventLocationId: '',
+      inventSiteId: '',
+      salesStatus: '',
+      documentStatus: '',
+      createdDateTime: '2026-08-01T00:00:00Z',
+    );
     when(() => repo.getMyOrders(company: 'usmf')).thenAnswer(
       (_) async => const Right<Failure, List<SalesOrderHeaderEntity>>(
-        <SalesOrderHeaderEntity>[],
+        <SalesOrderHeaderEntity>[older, newer],
       ),
     );
     final Either<Failure, List<SalesOrderHeaderEntity>> result = await sut(
       company: 'usmf',
     );
-    expect(result.isRight(), isTrue);
+    expect(
+      result
+          .getOrElse((_) => <SalesOrderHeaderEntity>[])
+          .map((SalesOrderHeaderEntity o) => o.salesId)
+          .toList(),
+      <String>['MM-2', 'MM-1'],
+    );
   });
 }

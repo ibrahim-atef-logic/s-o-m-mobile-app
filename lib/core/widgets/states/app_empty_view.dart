@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../extensions/theme_context.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_dimensions.dart';
-import '../../theme/app_text_styles.dart';
 import '../primary_button.dart';
+import 'app_state_glyph.dart';
 
 /// Empty-state placeholder with optional action.
 class AppEmptyView extends StatelessWidget {
@@ -30,18 +31,18 @@ class AppEmptyView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(icon, size: 64, color: AppColors.neutral300),
+            AppStateGlyph(icon: icon, color: AppColors.primary),
             const SizedBox(height: AppDimensions.spaceLg),
             Text(
               title,
-              style: AppTextStyles.titleLg,
+              style: context.textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
             if (description != null) ...<Widget>[
               const SizedBox(height: AppDimensions.spaceSm),
               Text(
                 description!,
-                style: AppTextStyles.bodySm,
+                style: context.textTheme.bodySmall,
                 textAlign: TextAlign.center,
               ),
             ],

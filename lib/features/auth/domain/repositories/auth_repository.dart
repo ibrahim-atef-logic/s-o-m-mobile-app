@@ -29,6 +29,7 @@ abstract class AuthRepository {
   Future<Either<Failure, UserSessionEntity>> persistWarehouse({
     required String inventLocationId,
     String? dataAreaId,
+    String? warehouseDisplayName,
   });
 
   Future<String?> readAccessToken();

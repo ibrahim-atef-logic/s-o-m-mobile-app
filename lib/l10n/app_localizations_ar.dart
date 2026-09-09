@@ -18,13 +18,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get helloTitle => 'إدارة أوامر المبيعات';
 
   @override
-  String get helloSubtitle => 'امسح وأضف وأدر أسطر أوامر المبيعات في الموقع';
+  String get helloSubtitle =>
+      'أنشئ أوامر المبيعات وامسح الأصناف وأدر أسطر الأوامر';
 
   @override
   String get login => 'تسجيل الدخول';
 
   @override
   String get loginTitle => 'تسجيل الدخول';
+
+  @override
+  String get loginWelcome => 'مرحباً بعودتك';
+
+  @override
+  String get loginSubtitle => 'أدخل بيانات بيئتك للمتابعة';
+
+  @override
+  String get loginSecureHint => 'اتصال مشفّر · بياناتك تبقى على هذا الجهاز';
 
   @override
   String get logout => 'تسجيل الخروج';
@@ -107,10 +117,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get selectCustomer => 'اختر العميل';
 
   @override
-  String get searchCustomers => 'ابحث برقم الحساب بالكامل';
+  String get searchCustomers => 'ابحث برقم الحساب أو اسم العميل';
 
   @override
-  String get noCustomers => 'لا يوجد عميل مطابق. اكتب رقم الحساب بالكامل.';
+  String get noCustomers => 'لا يوجد عميل مطابق';
+
+  @override
+  String customersResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count نتيجة',
+      one: 'نتيجة واحدة',
+      zero: 'لا نتائج',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get errorCustomersLoadFailed => 'تعذر تحميل العملاء، حاول مرة أخرى';
@@ -128,7 +150,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get salesOrderDetails => 'تفاصيل أمر المبيعات';
 
   @override
-  String get orderSummary => 'ملخص الأمر';
+  String get orderSummary => 'ملخص أمر المبيعات';
+
+  @override
+  String get salesStatus => 'حالة الأمر';
+
+  @override
+  String get documentStatus => 'حالة المستند';
+
+  @override
+  String get linesCountLabel => 'عدد الأسطر';
+
+  @override
+  String get addItems => 'إضافة أصناف';
+
+  @override
+  String get addItemsDesc => 'امسح وأضف الأسطر (تلقائي أو يدوي)';
+
+  @override
+  String get submitModeAuto => 'تلقائي';
+
+  @override
+  String get submitModeManual => 'يدوي';
+
+  @override
+  String get submitModeAutoHint => 'يُضاف فوراً على الأمر عند Enter على الكمية';
+
+  @override
+  String get submitModeManualHint => 'راجع الكمية ثم اضغط إضافة';
+
+  @override
+  String get linePosted => 'مرحّل';
 
   @override
   String get viewLines => 'عرض الأسطر';
@@ -164,13 +216,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get addItem => 'إضافة صنف';
 
   @override
-  String get addToCart => 'إضافة إلى السلة';
+  String get addToCart => 'إضافة';
+
+  @override
+  String get copyError => 'نسخ التفاصيل';
+
+  @override
+  String get errorCopied => 'تم نسخ تفاصيل الخطأ';
 
   @override
   String get scanBarcode => 'مسح الباركود';
 
   @override
   String get scanWithCamera => 'المسح بالكاميرا';
+
+  @override
+  String get hideCamera => 'إخفاء الكاميرا';
+
+  @override
+  String get searchByBarcode => 'باركود';
+
+  @override
+  String get searchByItem => 'صنف';
+
+  @override
+  String get deleteLine => 'حذف السطر';
+
+  @override
+  String get confirmDeleteLine => 'حذف هذا السطر من الأمر؟';
+
+  @override
+  String get lineDeletePending => 'حذف السطر غير متاح على الخادم بعد';
 
   @override
   String get toggleTorch => 'تشغيل/إيقاف الفلاش';
@@ -293,6 +369,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get lineTotal => 'إجمالي السطر';
 
   @override
+  String get orderTotal => 'إجمالي الأمر';
+
+  @override
   String linesTitle(String salesId) {
     return 'الأسطر · $salesId';
   }
@@ -355,7 +434,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorAccountDisabled => 'الحساب غير نشط في D365 / الموبايل';
 
   @override
-  String get errorPasswordChangeFailed => 'تعذر تغيير كلمة المرور';
+  String get errorPasswordChangeFailed =>
+      'تعذر تغيير كلمة المرور. تحقق من كلمة المرور الحالية ثم حاول مرة أخرى.';
 
   @override
   String get errorWarehouseNotAssigned =>
@@ -372,6 +452,12 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get profileActiveCompany => 'الشركة';
+
+  @override
+  String get profileWarehouse => 'المستودع';
+
+  @override
+  String get profileSelectWarehouse => 'اختر المستودع';
 
   @override
   String get profileDefaultWarehouse => 'المستودع الافتراضي';
@@ -400,6 +486,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noWarehouses => 'لا توجد مستودعات قياسية متاحة لهذه الشركة';
+
+  @override
+  String get noWarehousesMatchSearch => 'لا توجد مستودعات مطابقة للبحث';
 
   @override
   String get errorWarehousesLoadFailed =>
@@ -432,7 +521,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'يجب أن تختلف كلمة المرور الجديدة عن الحالية';
 
   @override
-  String get passwordChanged => 'تم تغيير كلمة المرور';
+  String get passwordChanged => 'تم تحديث كلمة المرور بنجاح.';
 
   @override
   String get errorTimeout => 'انتهت مهلة الطلب';
@@ -443,6 +532,29 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get errorDynamicsUnavailable =>
       'بيئة Dynamics غير متاحة — أعد المحاولة لاحقاً';
+
+  @override
+  String get errorPriceFetchFailed => 'تعذر جلب السعر';
+
+  @override
+  String get errorUnitConversion =>
+      'تعذر تحويل وحدة القياس / السعر لهذا المنتج';
+
+  @override
+  String get errorCustomerStopped =>
+      'هذا العميل موقوف في Dynamics ولا يمكن إنشاء أمر له';
+
+  @override
+  String get errorLineAlreadyExists => 'هذا الصنف مضاف على أمر البيع بالفعل';
+
+  @override
+  String get errorItemNotFound => 'الصنف غير موجود';
+
+  @override
+  String get errorForbiddenCompany => 'هذه الشركة غير مسموحة للجلسة الحالية';
+
+  @override
+  String get errorSoNotOpen => 'أمر البيع هذا غير مفتوح للتعديل';
 
   @override
   String get errorValidation => 'يرجى التحقق من المدخلات';
@@ -491,4 +603,10 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get english => 'English';
+
+  @override
+  String get decreaseQuantity => 'تقليل الكمية';
+
+  @override
+  String get increaseQuantity => 'زيادة الكمية';
 }

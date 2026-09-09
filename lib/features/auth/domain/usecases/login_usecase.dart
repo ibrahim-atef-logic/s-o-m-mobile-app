@@ -19,7 +19,9 @@ class LoginUseCase {
         password.isEmpty) {
       return Future<Either<Failure, AuthTokensEntity>>.value(
         const Left<Failure, AuthTokensEntity>(
-          ValidationFailure('Company, personnel number and password are required'),
+          ValidationFailure(
+            'Company, personnel number and password are required',
+          ),
         ),
       );
     }

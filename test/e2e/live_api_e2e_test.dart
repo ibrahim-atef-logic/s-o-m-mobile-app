@@ -24,25 +24,35 @@ void main() {
     expect('${body['dynamicsMode']}'.toLowerCase(), contains('live'));
   });
 
-  test('E2E-02 login success caches activation user (activeCompany=mm)', () async {
-    final Response<dynamic> res = await client.loginOnce();
-    expect(res.statusCode, 200);
-    final Map<String, dynamic> data =
-        (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
-    expect(data['accessToken'], isA<String>());
-    expect(data['refreshToken'], isA<String>());
-    expect((data['accessToken'] as String).isNotEmpty, isTrue);
-    final Map<String, dynamic> user = data['user'] as Map<String, dynamic>;
-    expect('${user['personnelNumber']}', Fixtures.personnelNumber);
-    expect('${user['activeCompany']}'.toLowerCase(), 'mm');
-    expect('${user['activeWarehouse']}', Fixtures.warehouse);
-    expect('${user['defaultCustAccount']}', '10-10002');
-    expect('${user['retailChannelId']}', '912');
-    expect('${user['currency']}', 'SAR');
-  });
+  test(
+    'E2E-02 login success caches activation user (activeCompany=mm)',
+    () async {
+      final Response<dynamic> res = await client.loginOnce();
+      expect(res.statusCode, 200);
+      final Map<String, dynamic> data =
+          (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+      expect(data['accessToken'], isA<String>());
+      expect(data['refreshToken'], isA<String>());
+      expect((data['accessToken'] as String).isNotEmpty, isTrue);
+      final Map<String, dynamic> user = data['user'] as Map<String, dynamic>;
+      expect('${user['personnelNumber']}', Fixtures.personnelNumber);
+      expect('${user['activeCompany']}'.toLowerCase(), 'mm');
+      expect('${user['activeWarehouse']}', Fixtures.warehouse);
+      expect('${user['defaultCustAccount']}', '10-10002');
+      expect('${user['retailChannelId']}', '912');
+      // Present once the gateway maps D365 RetailChannelName.
+      final Object? channelName = user['retailChannelName'];
+      if (channelName != null && '$channelName'.trim().isNotEmpty) {
+        expect('$channelName'.trim(), isNotEmpty);
+      }
+      expect('${user['currency']}', 'SAR');
+    },
+  );
 
   test('E2E-03 wrong password fails', () async {
-    final Response<dynamic> res = await client.loginOnce(passwordOverride: 'wrong-pass');
+    final Response<dynamic> res = await client.loginOnce(
+      passwordOverride: 'wrong-pass',
+    );
     expect(res.statusCode, isNot(200));
     final Map<String, dynamic> body = res.data as Map<String, dynamic>;
     expect(body['success'], isFalse);
@@ -96,7 +106,10 @@ void main() {
       options: Options(headers: client.authHeader()),
     );
     expect(linesRes.statusCode, 200);
-    expect((linesRes.data as Map<String, dynamic>)['data'], isA<List<dynamic>>());
+    expect(
+      (linesRes.data as Map<String, dynamic>)['data'],
+      isA<List<dynamic>>(),
+    );
   });
 
   test('E2E-07 barcode trim equals BG410.003', () async {
@@ -126,27 +139,38 @@ void main() {
     expect('${error['code']}', 'BARCODE_NOT_FOUND');
   });
 
-  test('E2E-08 pricing returns price 50 for fixture', () async {
+  test('E2E-08 item-price returns finalPrice for fixture', () async {
     await client.loginOnce();
-    final Map<String, dynamic> header =
-        capturedHeader ?? Fixtures.sampleOrderHeaderJson;
     final Response<dynamic> barcodeRes = await client.dio.get<dynamic>(
       '/api/v1/barcodes/${Fixtures.barcode}',
       queryParameters: <String, String>{'company': LiveApiClient.legalEntity},
       options: Options(headers: client.authHeader()),
     );
     final Map<String, dynamic> barcode =
-        (barcodeRes.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+        (barcodeRes.data as Map<String, dynamic>)['data']
+            as Map<String, dynamic>;
     final String unitId = '${barcode['unitId'] ?? ''}'.trim();
+    expect(unitId, isNotEmpty);
 
-    final Response<dynamic> res = await client.dio.get<dynamic>(
-      '/api/v1/pricing',
-      queryParameters: <String, String>{
-        'item': Fixtures.itemNumber,
+    final Response<dynamic> loginUser = await client.dio.get<dynamic>(
+      '/api/v1/auth/me',
+      options: Options(headers: client.authHeader()),
+    );
+    final Map<String, dynamic> user =
+        (loginUser.data as Map<String, dynamic>)['data']
+            as Map<String, dynamic>;
+    final Object? channelRecId = user['retailChannelTableRecId'];
+    final String warehouse = '${user['activeWarehouse'] ?? Fixtures.warehouse}'
+        .trim();
+
+    final Response<dynamic> res = await client.dio.post<dynamic>(
+      '/api/v1/item-price',
+      data: <String, Object?>{
         'company': LiveApiClient.legalEntity,
-        'custAccount': '${header['custAccount']}',
-        'priceGroup': '${header['priceGroupId']}',
-        if (unitId.isNotEmpty) 'unitId': unitId,
+        'itemId': Fixtures.itemNumber,
+        'salesUnitId': unitId,
+        if (warehouse.isNotEmpty) 'warehouseId': warehouse,
+        if (channelRecId is num) 'channelRecId': channelRecId.toInt(),
       },
       options: Options(headers: client.authHeader()),
     );
@@ -154,8 +178,10 @@ void main() {
     expect(res.statusCode, 200);
     final Map<String, dynamic> data =
         (res.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
-    expect('${data['itemNumber']}'.trim(), Fixtures.itemNumber);
-    expect((data['price'] as num).toDouble(), 50);
+    expect('${data['itemId']}'.trim(), Fixtures.itemNumber);
+    expect(data['found'], isTrue);
+    expect(data['finalPrice'], isA<num>());
+    expect('${data['currency']}'.trim(), isNotEmpty);
   });
 
   test('E2E-09 inventory available for MMS000WH', () async {

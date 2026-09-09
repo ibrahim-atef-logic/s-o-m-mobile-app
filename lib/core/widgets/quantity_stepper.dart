@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../l10n/app_localizations.dart';
+import '../extensions/theme_context.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_dimensions.dart';
-import '../theme/app_text_styles.dart';
 
 /// Minus / field / plus quantity control with 48dp touch targets.
 class QuantityStepper extends StatelessWidget {
   const QuantityStepper({
     required this.controller,
     required this.onChanged,
+    this.onCommitted,
     this.min = 1,
     this.max,
     this.enabled = true,
@@ -18,6 +20,7 @@ class QuantityStepper extends StatelessWidget {
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onCommitted;
   final int min;
   final int? max;
   final bool enabled;
@@ -33,15 +36,17 @@ class QuantityStepper extends StatelessWidget {
     if (max != null && next > max!) next = max!;
     controller.text = '$next';
     onChanged(controller.text);
+    onCommitted?.call(controller.text);
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context);
     return Row(
       children: <Widget>[
         _StepButton(
           icon: Icons.remove,
-          semanticsLabel: 'Decrease quantity',
+          semanticsLabel: l10n.decreaseQuantity,
           onPressed: enabled ? () => _step(-1) : null,
         ),
         Expanded(
@@ -53,7 +58,7 @@ class QuantityStepper extends StatelessWidget {
             inputFormatters: <TextInputFormatter>[
               FilteringTextInputFormatter.digitsOnly,
             ],
-            style: AppTextStyles.numeric,
+            style: context.numericStyle,
             decoration: const InputDecoration(
               isDense: true,
               contentPadding: EdgeInsets.symmetric(
@@ -61,11 +66,13 @@ class QuantityStepper extends StatelessWidget {
               ),
             ),
             onChanged: onChanged,
+            onSubmitted: (_) => onCommitted?.call(controller.text),
+            textInputAction: TextInputAction.done,
           ),
         ),
         _StepButton(
           icon: Icons.add,
-          semanticsLabel: 'Increase quantity',
+          semanticsLabel: l10n.increaseQuantity,
           onPressed: enabled ? () => _step(1) : null,
         ),
       ],
@@ -93,6 +100,7 @@ class _StepButton extends StatelessWidget {
         width: AppDimensions.minTouchTarget,
         height: AppDimensions.minTouchTarget,
         child: IconButton(
+          tooltip: semanticsLabel,
           onPressed: onPressed,
           icon: Icon(icon),
           color: AppColors.primary,

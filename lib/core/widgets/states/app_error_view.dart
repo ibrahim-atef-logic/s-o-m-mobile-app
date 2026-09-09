@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../extensions/theme_context.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_dimensions.dart';
-import '../../theme/app_text_styles.dart';
 import '../primary_button.dart';
 import '../secondary_button.dart';
+import 'app_state_glyph.dart';
 
 /// Error state with localized title, detail message, retry, optional tech dump.
 class AppErrorView extends StatefulWidget {
@@ -18,6 +19,7 @@ class AppErrorView extends StatefulWidget {
   });
 
   final String title;
+
   /// User-facing explanation (API message). Shown under [title] when different.
   final String? message;
   final String? details;
@@ -33,7 +35,8 @@ class _AppErrorViewState extends State<AppErrorView> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
-    final String? subtitle = widget.message?.trim().isNotEmpty == true &&
+    final String? subtitle =
+        widget.message?.trim().isNotEmpty == true &&
             widget.message != widget.title
         ? widget.message
         : null;
@@ -43,22 +46,23 @@ class _AppErrorViewState extends State<AppErrorView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Icon(
-              Icons.cloud_off_outlined,
-              size: 64,
+            const AppStateGlyph(
+              icon: Icons.cloud_off_outlined,
               color: AppColors.danger,
             ),
             const SizedBox(height: AppDimensions.spaceLg),
             Text(
               widget.title,
-              style: AppTextStyles.titleLg,
+              style: context.textTheme.titleLarge,
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...<Widget>[
               const SizedBox(height: AppDimensions.spaceSm),
               Text(
                 subtitle,
-                style: AppTextStyles.body.copyWith(color: AppColors.textSecondary),
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -82,7 +86,7 @@ class _AppErrorViewState extends State<AppErrorView> {
                 const SizedBox(height: AppDimensions.spaceSm),
                 Text(
                   widget.details!,
-                  style: AppTextStyles.caption,
+                  style: context.textTheme.labelSmall,
                   textAlign: TextAlign.center,
                 ),
               ],

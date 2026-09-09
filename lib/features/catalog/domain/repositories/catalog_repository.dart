@@ -13,12 +13,17 @@ abstract class CatalogRepository {
     required String company,
   });
 
+  Future<Either<Failure, BarcodeItemEntity>> lookupItem({
+    required String itemNumber,
+    required String company,
+  });
+
   Future<Either<Failure, PriceInfoEntity>> resolvePrice({
     required String itemNumber,
     required String company,
-    required String custAccount,
-    required String priceGroup,
-    String? unitId,
+    required String salesUnitId,
+    String? warehouseId,
+    int? channelRecId,
   });
 
   Future<Either<Failure, WarehouseOnHandEntity>> getOnHand({

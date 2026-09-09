@@ -119,7 +119,7 @@ abstract class AppLocalizations {
   /// No description provided for @helloSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Scan, add, and manage sales order lines on the floor'**
+  /// **'Create sales orders, scan items, and manage order lines'**
   String get helloSubtitle;
 
   /// No description provided for @login.
@@ -133,6 +133,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in'**
   String get loginTitle;
+
+  /// No description provided for @loginWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get loginWelcome;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your environment credentials to continue'**
+  String get loginSubtitle;
+
+  /// No description provided for @loginSecureHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Encrypted connection · credentials stay on this device'**
+  String get loginSecureHint;
 
   /// No description provided for @logout.
   ///
@@ -275,14 +293,20 @@ abstract class AppLocalizations {
   /// No description provided for @searchCustomers.
   ///
   /// In en, this message translates to:
-  /// **'Search by full account number'**
+  /// **'Search by account number or customer name'**
   String get searchCustomers;
 
   /// No description provided for @noCustomers.
   ///
   /// In en, this message translates to:
-  /// **'No customer found. Enter the full account number.'**
+  /// **'No matching customers'**
   String get noCustomers;
+
+  /// No description provided for @customersResultCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No results} =1{1 result} other{{count} results}}'**
+  String customersResultCount(int count);
 
   /// No description provided for @errorCustomersLoadFailed.
   ///
@@ -317,8 +341,68 @@ abstract class AppLocalizations {
   /// No description provided for @orderSummary.
   ///
   /// In en, this message translates to:
-  /// **'Order summary'**
+  /// **'Sales order summary'**
   String get orderSummary;
+
+  /// No description provided for @salesStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales status'**
+  String get salesStatus;
+
+  /// No description provided for @documentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Document status'**
+  String get documentStatus;
+
+  /// No description provided for @linesCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lines'**
+  String get linesCountLabel;
+
+  /// No description provided for @addItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Add items'**
+  String get addItems;
+
+  /// No description provided for @addItemsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan and add lines (auto or manual)'**
+  String get addItemsDesc;
+
+  /// No description provided for @submitModeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get submitModeAuto;
+
+  /// No description provided for @submitModeManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get submitModeManual;
+
+  /// No description provided for @submitModeAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Posts to the order immediately on quantity Enter'**
+  String get submitModeAutoHint;
+
+  /// No description provided for @submitModeManualHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Review quantity, then tap Add'**
+  String get submitModeManualHint;
+
+  /// No description provided for @linePosted.
+  ///
+  /// In en, this message translates to:
+  /// **'Posted'**
+  String get linePosted;
 
   /// No description provided for @viewLines.
   ///
@@ -389,8 +473,20 @@ abstract class AppLocalizations {
   /// No description provided for @addToCart.
   ///
   /// In en, this message translates to:
-  /// **'Add to cart'**
+  /// **'Add'**
   String get addToCart;
+
+  /// No description provided for @copyError.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy details'**
+  String get copyError;
+
+  /// No description provided for @errorCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Error details copied'**
+  String get errorCopied;
 
   /// No description provided for @scanBarcode.
   ///
@@ -403,6 +499,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Scan with camera'**
   String get scanWithCamera;
+
+  /// No description provided for @hideCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide camera'**
+  String get hideCamera;
+
+  /// No description provided for @searchByBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode'**
+  String get searchByBarcode;
+
+  /// No description provided for @searchByItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Item'**
+  String get searchByItem;
+
+  /// No description provided for @deleteLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete line'**
+  String get deleteLine;
+
+  /// No description provided for @confirmDeleteLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this line from the order?'**
+  String get confirmDeleteLine;
+
+  /// No description provided for @lineDeletePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Line delete is not available on the server yet'**
+  String get lineDeletePending;
 
   /// No description provided for @toggleTorch.
   ///
@@ -590,6 +722,12 @@ abstract class AppLocalizations {
   /// **'Line total'**
   String get lineTotal;
 
+  /// No description provided for @orderTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Order total'**
+  String get orderTotal;
+
   /// No description provided for @linesTitle.
   ///
   /// In en, this message translates to:
@@ -695,7 +833,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorPasswordChangeFailed.
   ///
   /// In en, this message translates to:
-  /// **'Password could not be changed'**
+  /// **'We couldn\'t change your password. Check your current password and try again.'**
   String get errorPasswordChangeFailed;
 
   /// No description provided for @errorWarehouseNotAssigned.
@@ -727,6 +865,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Company'**
   String get profileActiveCompany;
+
+  /// No description provided for @profileWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse'**
+  String get profileWarehouse;
+
+  /// No description provided for @profileSelectWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Select warehouse'**
+  String get profileSelectWarehouse;
 
   /// No description provided for @profileDefaultWarehouse.
   ///
@@ -781,6 +931,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No standard warehouses are available for this company'**
   String get noWarehouses;
+
+  /// No description provided for @noWarehousesMatchSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'No warehouses match your search'**
+  String get noWarehousesMatchSearch;
 
   /// No description provided for @errorWarehousesLoadFailed.
   ///
@@ -839,7 +995,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordChanged.
   ///
   /// In en, this message translates to:
-  /// **'Password changed'**
+  /// **'Your password was updated successfully.'**
   String get passwordChanged;
 
   /// No description provided for @errorTimeout.
@@ -859,6 +1015,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dynamics environment is unavailable — try again shortly'**
   String get errorDynamicsUnavailable;
+
+  /// No description provided for @errorPriceFetchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not fetch price'**
+  String get errorPriceFetchFailed;
+
+  /// No description provided for @errorUnitConversion.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit/price conversion is not available for this product'**
+  String get errorUnitConversion;
+
+  /// No description provided for @errorCustomerStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'This customer is stopped in Dynamics and cannot be used for orders'**
+  String get errorCustomerStopped;
+
+  /// No description provided for @errorLineAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'This item is already on the sales order'**
+  String get errorLineAlreadyExists;
+
+  /// No description provided for @errorItemNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Item not found'**
+  String get errorItemNotFound;
+
+  /// No description provided for @errorForbiddenCompany.
+  ///
+  /// In en, this message translates to:
+  /// **'This company is not allowed for the current session'**
+  String get errorForbiddenCompany;
+
+  /// No description provided for @errorSoNotOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'This sales order is not open for editing'**
+  String get errorSoNotOpen;
 
   /// No description provided for @errorValidation.
   ///
@@ -955,6 +1153,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get english;
+
+  /// No description provided for @decreaseQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Decrease quantity'**
+  String get decreaseQuantity;
+
+  /// No description provided for @increaseQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase quantity'**
+  String get increaseQuantity;
 }
 
 class _AppLocalizationsDelegate

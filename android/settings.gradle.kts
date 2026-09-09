@@ -24,3 +24,5 @@ plugins {
 }
 
 include(":app")
+include(":honeywell")
+project(":honeywell").projectDir = file("honeywell")

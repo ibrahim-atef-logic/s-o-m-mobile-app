@@ -80,4 +80,34 @@ void main() {
       const Left<Failure, BarcodeItemEntity>(ServerFailure('not found')),
     );
   });
+
+  test('forwards barcode without trimming spaces', () async {
+    when(
+      () => mockRepo.lookupBarcode(
+        code: any(named: 'code'),
+        company: any(named: 'company'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, BarcodeItemEntity>(tItem));
+
+    await sut(code: '  6287007961754  ', company: 'mm');
+
+    verify(
+      () => mockRepo.lookupBarcode(code: '  6287007961754  ', company: 'mm'),
+    ).called(1);
+  });
+
+  test('strips scanner controls from 6287007961754 only', () async {
+    when(
+      () => mockRepo.lookupBarcode(
+        code: any(named: 'code'),
+        company: any(named: 'company'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, BarcodeItemEntity>(tItem));
+
+    await sut(code: '6287007961754\r\n', company: 'mm');
+
+    verify(
+      () => mockRepo.lookupBarcode(code: '6287007961754', company: 'mm'),
+    ).called(1);
+  });
 }

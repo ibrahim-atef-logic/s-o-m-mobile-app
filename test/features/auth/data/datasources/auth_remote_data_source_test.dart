@@ -18,9 +18,7 @@ void main() {
   });
 
   test('login posts company + personnelNumber + password', () async {
-    when(
-      () => dio.post<dynamic>(any(), data: any(named: 'data')),
-    ).thenAnswer(
+    when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
       (_) async => Response<dynamic>(
         requestOptions: RequestOptions(path: ''),
         statusCode: 200,
@@ -51,9 +49,7 @@ void main() {
   });
 
   test('login always sends personnelNumber as a JSON string', () async {
-    when(
-      () => dio.post<dynamic>(any(), data: any(named: 'data')),
-    ).thenAnswer(
+    when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
       (_) async => Response<dynamic>(
         requestOptions: RequestOptions(path: ''),
         statusCode: 200,
@@ -71,7 +67,10 @@ void main() {
     );
 
     final VerificationResult captured = verify(
-      () => dio.post<dynamic>('/api/v1/auth/login', data: captureAny(named: 'data')),
+      () => dio.post<dynamic>(
+        '/api/v1/auth/login',
+        data: captureAny(named: 'data'),
+      ),
     );
     final Map<String, String> body =
         captured.captured.single as Map<String, String>;
@@ -98,9 +97,7 @@ void main() {
   });
 
   test('changePassword posts old and new password only', () async {
-    when(
-      () => dio.post<dynamic>(any(), data: any(named: 'data')),
-    ).thenAnswer(
+    when(() => dio.post<dynamic>(any(), data: any(named: 'data'))).thenAnswer(
       (_) async => Response<dynamic>(
         requestOptions: RequestOptions(path: ''),
         statusCode: 200,
@@ -123,10 +120,7 @@ void main() {
     verify(
       () => dio.post<dynamic>(
         '/api/v1/auth/change-password',
-        data: <String, String>{
-          'oldPassword': '123',
-          'newPassword': '456',
-        },
+        data: <String, String>{'oldPassword': '123', 'newPassword': '456'},
       ),
     ).called(1);
   });

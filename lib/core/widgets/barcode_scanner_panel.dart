@@ -3,9 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../extensions/theme_context.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_dimensions.dart';
-import '../theme/app_text_styles.dart';
+import '../theme/app_gradients.dart';
 
 typedef BarcodeCaptured = void Function(String code);
 
@@ -39,7 +40,7 @@ class _BarcodeScannerPanelState extends State<BarcodeScannerPanel>
     super.initState();
     _scanLine = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: AppDimensions.durationScanLoop,
     )..repeat(reverse: true);
   }
 
@@ -70,12 +71,16 @@ class _BarcodeScannerPanelState extends State<BarcodeScannerPanel>
         Row(
           children: <Widget>[
             Expanded(
-              child: Text(l10n.scanWithCamera, style: AppTextStyles.titleMd),
+              child: Text(
+                l10n.scanWithCamera,
+                style: context.textTheme.titleMedium,
+              ),
             ),
             Semantics(
               label: l10n.toggleTorch,
               button: true,
               child: IconButton(
+                tooltip: l10n.toggleTorch,
                 onPressed: () => _controller.toggleTorch(),
                 icon: const Icon(Icons.flash_on_outlined),
                 color: AppColors.primary,
@@ -84,8 +89,13 @@ class _BarcodeScannerPanelState extends State<BarcodeScannerPanel>
           ],
         ),
         const SizedBox(height: AppDimensions.spaceSm),
-        SizedBox(
-          height: 200,
+        Container(
+          height: AppDimensions.scannerViewportHeight + AppDimensions.spaceSm,
+          padding: const EdgeInsets.all(AppDimensions.spaceXs),
+          decoration: BoxDecoration(
+            gradient: AppGradients.brand,
+            borderRadius: BorderRadius.circular(AppDimensions.radiusXl),
+          ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
             child: Stack(
@@ -102,11 +112,13 @@ class _BarcodeScannerPanelState extends State<BarcodeScannerPanel>
                     );
                   },
                   child: Container(
-                    height: 2,
+                    height: AppDimensions.scanLineThickness,
                     margin: const EdgeInsets.symmetric(
                       horizontal: AppDimensions.spaceXl,
                     ),
-                    color: AppColors.accent.withValues(alpha: 0.85),
+                    color: AppColors.accent.withValues(
+                      alpha: AppDimensions.scanLineAlpha,
+                    ),
                   ),
                 ),
               ],
@@ -122,9 +134,25 @@ class _BarcodeScannerPanelState extends State<BarcodeScannerPanel>
               color: AppColors.successContainer,
               borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
             ),
-            child: Text(
-              '${l10n.lastScanned}: ${widget.lastScanned}',
-              style: AppTextStyles.bodySm.copyWith(color: AppColors.success),
+            child: Row(
+              children: <Widget>[
+                const Icon(
+                  Icons.check_circle_outline,
+                  size: AppDimensions.iconSm,
+                  color: AppColors.success,
+                ),
+                const SizedBox(width: AppDimensions.spaceXs),
+                Expanded(
+                  child: Text(
+                    '${l10n.lastScanned}: ${widget.lastScanned}',
+                    style: context.textTheme.bodySmall?.copyWith(
+                      color: AppColors.onSuccessContainer,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -149,10 +177,10 @@ class _ReticlePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
       ..color = AppColors.accent
-      ..strokeWidth = 3
+      ..strokeWidth = AppDimensions.reticleStroke
       ..style = PaintingStyle.stroke;
-    const double len = 28;
-    const double inset = 36;
+    const double len = AppDimensions.reticleArm;
+    const double inset = AppDimensions.reticleInset;
     final Path path = Path()
       ..moveTo(inset, inset + len)
       ..lineTo(inset, inset)

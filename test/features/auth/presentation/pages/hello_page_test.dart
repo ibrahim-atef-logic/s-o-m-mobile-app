@@ -27,7 +27,9 @@ void main() {
     localeCubit = LocaleCubit(LocaleRepository(prefs));
     authBloc = MockAuthBloc();
     when(() => authBloc.state).thenReturn(const AuthUnauthenticated());
-    when(() => authBloc.stream).thenAnswer((_) => const Stream<AuthState>.empty());
+    when(
+      () => authBloc.stream,
+    ).thenAnswer((_) => const Stream<AuthState>.empty());
     when(authBloc.close).thenAnswer((_) async {});
   });
 
@@ -44,10 +46,7 @@ void main() {
     final GoRouter router = GoRouter(
       initialLocation: '/hello',
       routes: <RouteBase>[
-        GoRoute(
-          path: '/hello',
-          builder: (_, __) => const HelloPage(),
-        ),
+        GoRoute(path: '/hello', builder: (_, __) => const HelloPage()),
         GoRoute(
           path: '/login',
           builder: (_, __) => const Scaffold(body: Text('LOGIN_PAGE')),
@@ -94,7 +93,9 @@ void main() {
     expect(find.text('LOGIN_PAGE'), findsOneWidget);
   });
 
-  testWidgets('Hello shows logout when authenticated', (WidgetTester tester) async {
+  testWidgets('Hello shows logout when authenticated', (
+    WidgetTester tester,
+  ) async {
     when(() => authBloc.state).thenReturn(
       const AuthAuthenticated(
         UserSessionEntity(

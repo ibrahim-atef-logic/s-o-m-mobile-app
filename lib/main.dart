@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -59,7 +58,7 @@ class LogicRetailApp extends StatelessWidget {
           return MaterialApp.router(
             onGenerateTitle: (BuildContext context) =>
                 AppLocalizations.of(context).appTitle,
-            debugShowCheckedModeBanner: kDebugMode,
+            debugShowCheckedModeBanner: false,
             theme: buildAppTheme(),
             locale: locale,
             routerConfig: createAppRouter(authBloc),

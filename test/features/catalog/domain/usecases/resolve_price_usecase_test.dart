@@ -16,9 +16,7 @@ void main() {
     itemNumber: 'BG410.003',
     price: 12.5,
     unitId: 'pcs',
-    customerAccountNumber: '20-10004',
-    priceCustomerGroupCode: 'RETAIL',
-    dataArea: 'mm',
+    currency: 'SAR',
   );
 
   setUp(() {
@@ -26,42 +24,70 @@ void main() {
     sut = ResolvePriceUseCase(mockRepo);
   });
 
-  test('returns ValidationFailure when item or company empty', () async {
+  test('returns ValidationFailure when item/company empty', () async {
     final Either<Failure, PriceInfoEntity> result = await sut(
       itemNumber: ' ',
       company: 'mm',
-      custAccount: '20-10004',
-      priceGroup: 'RETAIL',
+      salesUnitId: 'pcs',
     );
     expect(result.isLeft(), isTrue);
     verifyNever(
       () => mockRepo.resolvePrice(
         itemNumber: any(named: 'itemNumber'),
         company: any(named: 'company'),
-        custAccount: any(named: 'custAccount'),
-        priceGroup: any(named: 'priceGroup'),
-        unitId: any(named: 'unitId'),
+        salesUnitId: any(named: 'salesUnitId'),
+        warehouseId: any(named: 'warehouseId'),
+        channelRecId: any(named: 'channelRecId'),
       ),
     );
   });
 
-  test('forwards unitId to repository', () async {
+  test('allows empty salesUnitId for DataAreas that resolve without unit', () async {
     when(
       () => mockRepo.resolvePrice(
         itemNumber: any(named: 'itemNumber'),
         company: any(named: 'company'),
-        custAccount: any(named: 'custAccount'),
-        priceGroup: any(named: 'priceGroup'),
-        unitId: any(named: 'unitId'),
+        salesUnitId: any(named: 'salesUnitId'),
+        warehouseId: any(named: 'warehouseId'),
+        channelRecId: any(named: 'channelRecId'),
+      ),
+    ).thenAnswer((_) async => const Right<Failure, PriceInfoEntity>(tPrice));
+
+    final Either<Failure, PriceInfoEntity> result = await sut(
+      itemNumber: 'BG410.003',
+      company: 'ty',
+      salesUnitId: '',
+    );
+
+    expect(result, const Right<Failure, PriceInfoEntity>(tPrice));
+    verify(
+      () => mockRepo.resolvePrice(
+        itemNumber: 'BG410.003',
+        company: 'ty',
+        salesUnitId: '',
+        warehouseId: null,
+        channelRecId: null,
+      ),
+    ).called(1);
+  });
+
+  test('forwards salesUnitId warehouse and channel to repository', () async {
+    when(
+      () => mockRepo.resolvePrice(
+        itemNumber: any(named: 'itemNumber'),
+        company: any(named: 'company'),
+        salesUnitId: any(named: 'salesUnitId'),
+        warehouseId: any(named: 'warehouseId'),
+        channelRecId: any(named: 'channelRecId'),
       ),
     ).thenAnswer((_) async => const Right<Failure, PriceInfoEntity>(tPrice));
 
     final Either<Failure, PriceInfoEntity> result = await sut(
       itemNumber: ' BG410.003 ',
       company: ' mm ',
-      custAccount: '20-10004',
-      priceGroup: 'RETAIL',
-      unitId: ' pcs ',
+      salesUnitId: ' pcs ',
+      warehouseId: ' MMS000WH ',
+      channelRecId: 5637152827,
     );
 
     expect(result, const Right<Failure, PriceInfoEntity>(tPrice));
@@ -69,9 +95,9 @@ void main() {
       () => mockRepo.resolvePrice(
         itemNumber: 'BG410.003',
         company: 'mm',
-        custAccount: '20-10004',
-        priceGroup: 'RETAIL',
-        unitId: 'pcs',
+        salesUnitId: 'pcs',
+        warehouseId: 'MMS000WH',
+        channelRecId: 5637152827,
       ),
     ).called(1);
   });

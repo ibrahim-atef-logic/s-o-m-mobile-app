@@ -8,11 +8,14 @@ abstract final class SessionWarehouseMerge {
     UserSessionEntity current, {
     required String inventLocationId,
     String? dataAreaId,
+    String? warehouseDisplayName,
   }) {
     final String? area = dataAreaId?.trim();
     return current.copyWith(
       activeWarehouse: inventLocationId,
       inventLocation: inventLocationId,
+      displayWarehouseName: warehouseDisplayName ?? inventLocationId,
+      activeWarehouseName: warehouseDisplayName,
       inventLocationDataAreaId: area == null || area.isEmpty
           ? current.inventLocationDataAreaId ?? current.operatingCompany
           : area,
@@ -21,27 +24,54 @@ abstract final class SessionWarehouseMerge {
   }
 
   /// Keeps a locally picked warehouse when the API returns none.
-  ///
-  /// Why: refresh tokens are minted before the device picks a warehouse, so the
-  /// refreshed payload can still be empty while the user already chose one.
   static UserSessionModel keepLocal(
     UserSessionModel fresh,
     UserSessionModel cached,
   ) {
     final UserSessionEntity freshEntity = fresh.toEntity();
-    if (freshEntity.resolvedWarehouse != null) {
-      return fresh;
+    UserSessionModel merged = fresh;
+    if (freshEntity.resolvedWarehouse == null) {
+      final String? local = cached.toEntity().resolvedWarehouse;
+      if (local != null) {
+        merged = UserSessionModel.fromEntity(
+          applyPick(
+            freshEntity,
+            inventLocationId: local,
+            dataAreaId: cached.inventLocationDataAreaId,
+            warehouseDisplayName:
+                cached.displayWarehouseName ?? cached.activeWarehouseName,
+          ),
+        );
+      }
     }
-    final String? local = cached.toEntity().resolvedWarehouse;
-    if (local == null) {
-      return fresh;
-    }
-    return UserSessionModel.fromEntity(
-      applyPick(
-        freshEntity,
-        inventLocationId: local,
-        dataAreaId: cached.inventLocationDataAreaId,
-      ),
+    return UserSessionModel.fromEntity(_mergeDisplayLabels(merged, cached));
+  }
+
+  static UserSessionEntity _mergeDisplayLabels(
+    UserSessionModel fresh,
+    UserSessionModel cached,
+  ) {
+    final UserSessionEntity freshEntity = fresh.toEntity();
+    final UserSessionEntity cachedEntity = cached.toEntity();
+    final String? freshWh = freshEntity.resolvedWarehouse?.trim();
+    final String? cachedWh = cachedEntity.resolvedWarehouse?.trim();
+    final bool sameWarehouse =
+        freshWh != null &&
+        cachedWh != null &&
+        freshWh.toLowerCase() == cachedWh.toLowerCase();
+    return freshEntity.copyWith(
+      displayWarehouseName: UserSessionEntity.firstNonEmpty(<String?>[
+        freshEntity.displayWarehouseName,
+        if (sameWarehouse) cachedEntity.displayWarehouseName,
+      ]),
+      activeWarehouseName: UserSessionEntity.firstNonEmpty(<String?>[
+        freshEntity.activeWarehouseName,
+        if (sameWarehouse) cachedEntity.activeWarehouseName,
+      ]),
+      displayCompanyName: UserSessionEntity.firstNonEmpty(<String?>[
+        freshEntity.displayCompanyName,
+        cachedEntity.displayCompanyName,
+      ]),
     );
   }
 }

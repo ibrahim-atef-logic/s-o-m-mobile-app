@@ -43,16 +43,49 @@ class SalesOrdersRepositoryImpl implements SalesOrdersRepository {
   }
 
   @override
+  Future<Either<Failure, SalesOrderHeaderEntity>> refreshOrder({
+    required String salesId,
+    required String company,
+  }) {
+    return _guard<SalesOrderHeaderEntity>(() async {
+      final SalesOrderHeaderModel model = await _remote.refreshOrder(
+        salesId: salesId,
+        company: company,
+      );
+      return model.toEntity();
+    });
+  }
+
+  @override
   Future<Either<Failure, List<SalesOrderLineEntity>>> getOrderLines({
     required String salesId,
     required String company,
+    int top = 50,
+    int skip = 0,
   }) {
     return _guard<List<SalesOrderLineEntity>>(() async {
       final List<SalesOrderLineModel> models = await _remote.getOrderLines(
         salesId: salesId,
         company: company,
+        top: top,
+        skip: skip,
       );
       return models.map((SalesOrderLineModel m) => m.toEntity()).toList();
+    });
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteOrderLine({
+    required String salesId,
+    required String company,
+    required int recordId,
+  }) {
+    return _guard<void>(() {
+      return _remote.deleteOrderLine(
+        salesId: salesId,
+        company: company,
+        recordId: recordId,
+      );
     });
   }
 

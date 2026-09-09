@@ -16,26 +16,41 @@ void main() {
     sut = ChangePasswordUseCase(repo);
   });
 
-  test('rejects empty, mismatch, and same-as-old without calling API', () async {
-    expect(
-      (await sut(oldPassword: '', newPassword: 'a', confirmPassword: 'a')).isLeft(),
-      isTrue,
-    );
-    expect(
-      (await sut(oldPassword: '1', newPassword: '2', confirmPassword: '3')).isLeft(),
-      isTrue,
-    );
-    expect(
-      (await sut(oldPassword: '1', newPassword: '1', confirmPassword: '1')).isLeft(),
-      isTrue,
-    );
-    verifyNever(
-      () => repo.changePassword(
-        oldPassword: any(named: 'oldPassword'),
-        newPassword: any(named: 'newPassword'),
-      ),
-    );
-  });
+  test(
+    'rejects empty, mismatch, and same-as-old without calling API',
+    () async {
+      expect(
+        (await sut(
+          oldPassword: '',
+          newPassword: 'a',
+          confirmPassword: 'a',
+        )).isLeft(),
+        isTrue,
+      );
+      expect(
+        (await sut(
+          oldPassword: '1',
+          newPassword: '2',
+          confirmPassword: '3',
+        )).isLeft(),
+        isTrue,
+      );
+      expect(
+        (await sut(
+          oldPassword: '1',
+          newPassword: '1',
+          confirmPassword: '1',
+        )).isLeft(),
+        isTrue,
+      );
+      verifyNever(
+        () => repo.changePassword(
+          oldPassword: any(named: 'oldPassword'),
+          newPassword: any(named: 'newPassword'),
+        ),
+      );
+    },
+  );
 
   test('calls repository when validation passes', () async {
     when(

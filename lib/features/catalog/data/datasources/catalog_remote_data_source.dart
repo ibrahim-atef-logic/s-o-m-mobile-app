@@ -1,11 +1,11 @@
 import 'package:dio/dio.dart';
 
-import '../../../../core/error/exceptions.dart';
 import '../models/barcode_item_model.dart';
 import '../models/failed_line_model.dart';
 import '../models/line_submit_result_model.dart';
 import '../models/price_info_model.dart';
 import '../models/warehouse_on_hand_model.dart';
+import 'catalog_remote_parse.dart';
 
 abstract class CatalogRemoteDataSource {
   Future<BarcodeItemModel> lookupBarcode({
@@ -13,12 +13,17 @@ abstract class CatalogRemoteDataSource {
     required String company,
   });
 
+  Future<BarcodeItemModel> lookupItem({
+    required String itemNumber,
+    required String company,
+  });
+
   Future<PriceInfoModel> resolvePrice({
     required String itemNumber,
     required String company,
-    required String custAccount,
-    required String priceGroup,
-    String? unitId,
+    required String salesUnitId,
+    String? warehouseId,
+    int? channelRecId,
   });
 
   Future<WarehouseOnHandModel> getOnHand({
@@ -59,12 +64,32 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
   }) async {
     try {
       final Response<dynamic> response = await _dio.get<dynamic>(
-        '/api/v1/barcodes/$code',
+        '/api/v1/barcodes/${Uri.encodeComponent(code)}',
         queryParameters: <String, String>{'company': company},
       );
-      return BarcodeItemModel.fromJson(_dataMap(response.data));
+      return BarcodeItemModel.fromJson(
+        CatalogRemoteParse.dataMap(response.data),
+      );
     } on DioException catch (e) {
-      throw _map(e);
+      throw CatalogRemoteParse.mapDio(e);
+    }
+  }
+
+  @override
+  Future<BarcodeItemModel> lookupItem({
+    required String itemNumber,
+    required String company,
+  }) async {
+    try {
+      final Response<dynamic> response = await _dio.get<dynamic>(
+        '/api/v1/items/${Uri.encodeComponent(itemNumber)}',
+        queryParameters: <String, String>{'company': company},
+      );
+      return BarcodeItemModel.fromJson(
+        CatalogRemoteParse.dataMap(response.data),
+      );
+    } on DioException catch (e) {
+      throw CatalogRemoteParse.mapDio(e);
     }
   }
 
@@ -72,28 +97,24 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
   Future<PriceInfoModel> resolvePrice({
     required String itemNumber,
     required String company,
-    required String custAccount,
-    required String priceGroup,
-    String? unitId,
+    required String salesUnitId,
+    String? warehouseId,
+    int? channelRecId,
   }) async {
     try {
-      final Map<String, String> query = <String, String>{
-        'item': itemNumber.trim(),
-        'company': company.trim(),
-        'custAccount': custAccount.trim(),
-        'priceGroup': priceGroup.trim(),
-      };
-      final String? unit = unitId?.trim();
-      if (unit != null && unit.isNotEmpty) {
-        query['unitId'] = unit;
-      }
-      final Response<dynamic> response = await _dio.get<dynamic>(
-        '/api/v1/pricing',
-        queryParameters: query,
+      final Response<dynamic> response = await _dio.post<dynamic>(
+        '/api/v1/item-price',
+        data: CatalogRemoteParse.itemPriceBody(
+          company: company,
+          itemId: itemNumber,
+          salesUnitId: salesUnitId,
+          warehouseId: warehouseId,
+          channelRecId: channelRecId,
+        ),
       );
-      return PriceInfoModel.fromJson(_dataMap(response.data));
+      return PriceInfoModel.fromJson(CatalogRemoteParse.dataMap(response.data));
     } on DioException catch (e) {
-      throw _map(e);
+      throw CatalogRemoteParse.mapDio(e);
     }
   }
 
@@ -112,9 +133,11 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
           'company': company,
         },
       );
-      return WarehouseOnHandModel.fromJson(_dataMap(response.data));
+      return WarehouseOnHandModel.fromJson(
+        CatalogRemoteParse.dataMap(response.data),
+      );
     } on DioException catch (e) {
-      throw _map(e);
+      throw CatalogRemoteParse.mapDio(e);
     }
   }
 
@@ -132,13 +155,18 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
           'company': company,
           'itemNumber': itemNumber,
           'quantity': quantity,
+          'ifExists': CatalogRemoteParse.ifExistsAdd,
         },
       );
-      return LineSubmitResultModel.fromJson(_dataMap(response.data));
+      return LineSubmitResultModel.fromJson(
+        CatalogRemoteParse.dataMap(response.data),
+      );
     } on DioException catch (e) {
-      final LineSubmitResultModel? failed = _tryParseSubmit(e);
+      final LineSubmitResultModel? failed = CatalogRemoteParse.tryParseSubmit(
+        e,
+      );
       if (failed != null) return failed;
-      throw _map(e);
+      throw CatalogRemoteParse.mapDio(e);
     }
   }
 
@@ -153,11 +181,15 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
         '/api/v1/sales-orders/$salesId/lines/quick',
         data: <String, Object>{'company': company, 'lines': lines},
       );
-      return LineSubmitResultModel.fromJson(_dataMap(response.data));
+      return LineSubmitResultModel.fromJson(
+        CatalogRemoteParse.dataMap(response.data),
+      );
     } on DioException catch (e) {
-      final LineSubmitResultModel? failed = _tryParseSubmit(e);
+      final LineSubmitResultModel? failed = CatalogRemoteParse.tryParseSubmit(
+        e,
+      );
       if (failed != null) return failed;
-      throw _map(e);
+      throw CatalogRemoteParse.mapDio(e);
     }
   }
 
@@ -176,32 +208,9 @@ class CatalogRemoteDataSourceImpl implements CatalogRemoteDataSource {
         '/api/v1/sales-orders/$salesId/failed-lines',
         queryParameters: query,
       );
-      final Object? data = (response.data as Map<String, dynamic>)['data'];
-      if (data is! List<dynamic>) return <FailedLineModel>[];
-      return data
-          .whereType<Map<String, dynamic>>()
-          .map(FailedLineModel.fromJson)
-          .toList();
+      return CatalogRemoteParse.failedLines(response.data);
     } on DioException catch (e) {
-      throw _map(e);
+      throw CatalogRemoteParse.mapDio(e);
     }
-  }
-
-  Map<String, dynamic> _dataMap(Object? body) =>
-      (body as Map<String, dynamic>)['data'] as Map<String, dynamic>;
-
-  LineSubmitResultModel? _tryParseSubmit(DioException e) {
-    if (e.response?.statusCode != 422) return null;
-    final Object? raw = e.response?.data;
-    if (raw is! Map<String, dynamic>) return null;
-    final Object? data = raw['data'];
-    if (data is! Map<String, dynamic>) return null;
-    return LineSubmitResultModel.fromJson(data);
-  }
-
-  Exception _map(DioException e) {
-    final Object? err = e.error;
-    if (err is Exception) return err;
-    return ServerException(e.message ?? 'Server error');
   }
 }

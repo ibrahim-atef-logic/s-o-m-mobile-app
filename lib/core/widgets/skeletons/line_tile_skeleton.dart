@@ -22,13 +22,13 @@ class LineTileSkeleton extends StatelessWidget {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ShimmerBox(width: 160, height: 16),
+          ShimmerBox(width: 160, height: AppDimensions.iconSm),
           SizedBox(height: AppDimensions.spaceSm),
           Row(
             children: <Widget>[
-              Expanded(child: ShimmerBox(height: 12)),
+              Expanded(child: ShimmerBox(height: AppDimensions.shimmerLineSm)),
               SizedBox(width: AppDimensions.spaceMd),
-              ShimmerBox(width: 64, height: 12),
+              ShimmerBox(width: 64, height: AppDimensions.shimmerLineSm),
             ],
           ),
         ],

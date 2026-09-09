@@ -5,6 +5,7 @@ import 'package:logic_retail_mobile/core/error/failures.dart';
 import 'package:logic_retail_mobile/features/auth/domain/entities/company_entity.dart';
 import 'package:logic_retail_mobile/features/auth/domain/entities/user_session_entity.dart';
 import 'package:logic_retail_mobile/features/customers/domain/entities/customer_entity.dart';
+import 'package:logic_retail_mobile/features/customers/domain/entities/customer_page_result.dart';
 import 'package:logic_retail_mobile/features/customers/domain/usecases/search_customers_usecase.dart';
 import 'package:logic_retail_mobile/features/sales_orders/domain/entities/created_order_entity.dart';
 import 'package:logic_retail_mobile/features/sales_orders/domain/entities/sales_order_header_entity.dart';
@@ -89,11 +90,18 @@ void main() {
         company: any(named: 'company'),
         search: any(named: 'search'),
         top: any(named: 'top'),
+        skip: any(named: 'skip'),
       ),
     ).thenAnswer(
-      (_) async => const Right<Failure, List<CustomerEntity>>(<CustomerEntity>[
-        defaultCustomer,
-      ]),
+      (_) async => Right<Failure, CustomerPageResult>(
+        CustomerPageResult(
+          items: const <CustomerEntity>[defaultCustomer],
+          top: 30,
+          skip: 0,
+          count: 1,
+          hasMore: false,
+        ),
+      ),
     );
   }
 
@@ -123,7 +131,6 @@ void main() {
     verify: (CreateOrderCubit cubit) {
       expect(cubit.state.company, 'mm');
       expect(cubit.state.warehouse, Fixtures.warehouse);
-      expect(cubit.state.currency, 'SAR');
       expect(cubit.state.customer, defaultCustomer);
       expect(cubit.state.canSubmit, isTrue);
       verify(
@@ -141,6 +148,29 @@ void main() {
       session.copyWith(activeCompany: 'PLTR', inventLocationDataAreaId: 'mm'),
     ),
     verify: (CreateOrderCubit cubit) => expect(cubit.state.company, 'mm'),
+  );
+
+  blocTest<CreateOrderCubit, CreateOrderState>(
+    'a session without a warehouse opens the picker and cannot submit yet',
+    setUp: stubDefaultCustomer,
+    build: build,
+    act: (CreateOrderCubit cubit) => cubit.start(
+      const UserSessionEntity(
+        personnelNumber: '12344',
+        workerRecId: 2,
+        name: 'Trial',
+        companies: <CompanyEntity>[
+          CompanyEntity(code: 'mm', name: 'mm', groupId: ''),
+        ],
+        activeCompany: 'mm',
+        needsWarehouseSelection: true,
+        defaultCustAccount: Fixtures.defaultCustAccount,
+      ),
+    ),
+    verify: (CreateOrderCubit cubit) {
+      expect(cubit.state.warehouse, isNull);
+      expect(cubit.state.canSubmit, isFalse);
+    },
   );
 
   blocTest<CreateOrderCubit, CreateOrderState>(
@@ -171,7 +201,6 @@ void main() {
           company: 'mm',
           custAccount: 'MMS021',
           inventLocationId: Fixtures.warehouse,
-          currencyCode: 'SAR',
         ),
       ).called(1);
       verify(

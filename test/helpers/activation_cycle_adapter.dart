@@ -57,6 +57,9 @@ class ActivationCycleAdapter implements HttpClientAdapter {
       }
       return _ok(Fixtures.sampleBarcodeJson);
     }
+    if (method == 'POST' && path.contains('/item-price')) {
+      return _ok(Fixtures.samplePriceJson);
+    }
     if (method == 'GET' && path.contains('/pricing')) {
       return _ok(Fixtures.samplePriceJson);
     }

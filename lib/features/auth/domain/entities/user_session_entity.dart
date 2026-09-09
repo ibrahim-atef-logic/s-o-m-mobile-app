@@ -2,6 +2,8 @@ import 'package:equatable/equatable.dart';
 
 import 'company_entity.dart';
 
+export 'user_session_display.dart';
+
 /// Cached mobile activation user. Source of truth after login/refresh/me.
 class UserSessionEntity extends Equatable {
   const UserSessionEntity({
@@ -17,9 +19,16 @@ class UserSessionEntity extends Equatable {
     this.company,
     this.retailChannelTableRecId,
     this.retailChannelId,
+    this.retailChannelName,
     this.channelType,
     this.inventLocation,
     this.inventLocationDataAreaId,
+    this.inventLocationDataAreaName,
+    this.userInfoCompany,
+    this.userInfoCompanyName,
+    this.displayCompanyName,
+    this.displayWarehouseName,
+    this.activeWarehouseName,
     this.currency,
     this.defaultCustAccount,
     this.defaultCustDataAreaId,
@@ -40,9 +49,30 @@ class UserSessionEntity extends Equatable {
   final String? company;
   final int? retailChannelTableRecId;
   final String? retailChannelId;
+
+  /// Human-readable branch/store from D365 `RetailChannelName` (via API).
+  final String? retailChannelName;
   final int? channelType;
   final String? inventLocation;
   final String? inventLocationDataAreaId;
+
+  /// Branch company display name from D365 (may be null until F&O deploys).
+  final String? inventLocationDataAreaName;
+
+  /// User company code from activation (`UserInfo_company`).
+  final String? userInfoCompany;
+
+  /// User company display name (may be null until F&O deploys).
+  final String? userInfoCompanyName;
+
+  /// Server-computed label: branch name → user company name → company name/code.
+  final String? displayCompanyName;
+
+  /// Warehouse label from D365 lookup (may equal code until Arabic name exists).
+  final String? displayWarehouseName;
+
+  /// Warehouse name from activation row (before display merge).
+  final String? activeWarehouseName;
   final String? currency;
   final String? defaultCustAccount;
   final String? defaultCustDataAreaId;
@@ -52,7 +82,7 @@ class UserSessionEntity extends Equatable {
 
   /// DataArea for catalog / sales-order API `company` query/body.
   String get operatingCompany {
-    return _firstNonEmpty(<String?>[
+    return firstNonEmpty(<String?>[
           activeCompany,
           company,
           selectedCompany?.code,
@@ -60,9 +90,32 @@ class UserSessionEntity extends Equatable {
         '';
   }
 
+  /// Human label for UI only — never send this as DataAreaId.
+  String get resolvedDisplayCompanyName {
+    return firstNonEmpty(<String?>[
+          displayCompanyName,
+          inventLocationDataAreaName,
+          userInfoCompanyName,
+          companies.isEmpty ? null : companies.first.name,
+          activeCompany,
+        ]) ??
+        '';
+  }
+
+  /// Human warehouse label for UI — codes only when no display name exists.
+  String get resolvedDisplayWarehouseName {
+    return firstNonEmpty(<String?>[
+          displayWarehouseName,
+          activeWarehouseName,
+          activeWarehouse,
+          inventLocation,
+        ]) ??
+        '';
+  }
+
   /// DataArea for create-sales-order calls, which follow the warehouse company.
   String get orderDataArea {
-    return _firstNonEmpty(<String?>[
+    return firstNonEmpty(<String?>[
           inventLocationDataAreaId,
           activeCompany,
           company,
@@ -72,18 +125,13 @@ class UserSessionEntity extends Equatable {
   }
 
   String? get resolvedWarehouse =>
-      _firstNonEmpty(<String?>[activeWarehouse, inventLocation]);
+      firstNonEmpty(<String?>[activeWarehouse, inventLocation]);
 
   bool get warehouseMissing {
     if (needsWarehouseSelection == true) {
       return true;
     }
     return resolvedWarehouse == null;
-  }
-
-  String displayOrDash(String? value) {
-    final String? v = _firstNonEmpty(<String?>[value]);
-    return v ?? '—';
   }
 
   CompanyEntity? companyByCode(String code) {
@@ -112,9 +160,16 @@ class UserSessionEntity extends Equatable {
     String? company,
     int? retailChannelTableRecId,
     String? retailChannelId,
+    String? retailChannelName,
     int? channelType,
     String? inventLocation,
     String? inventLocationDataAreaId,
+    String? inventLocationDataAreaName,
+    String? userInfoCompany,
+    String? userInfoCompanyName,
+    String? displayCompanyName,
+    String? displayWarehouseName,
+    String? activeWarehouseName,
     String? currency,
     String? defaultCustAccount,
     String? defaultCustDataAreaId,
@@ -136,10 +191,18 @@ class UserSessionEntity extends Equatable {
       retailChannelTableRecId:
           retailChannelTableRecId ?? this.retailChannelTableRecId,
       retailChannelId: retailChannelId ?? this.retailChannelId,
+      retailChannelName: retailChannelName ?? this.retailChannelName,
       channelType: channelType ?? this.channelType,
       inventLocation: inventLocation ?? this.inventLocation,
       inventLocationDataAreaId:
           inventLocationDataAreaId ?? this.inventLocationDataAreaId,
+      inventLocationDataAreaName:
+          inventLocationDataAreaName ?? this.inventLocationDataAreaName,
+      userInfoCompany: userInfoCompany ?? this.userInfoCompany,
+      userInfoCompanyName: userInfoCompanyName ?? this.userInfoCompanyName,
+      displayCompanyName: displayCompanyName ?? this.displayCompanyName,
+      displayWarehouseName: displayWarehouseName ?? this.displayWarehouseName,
+      activeWarehouseName: activeWarehouseName ?? this.activeWarehouseName,
       currency: currency ?? this.currency,
       defaultCustAccount: defaultCustAccount ?? this.defaultCustAccount,
       defaultCustDataAreaId:
@@ -151,7 +214,8 @@ class UserSessionEntity extends Equatable {
     );
   }
 
-  static String? _firstNonEmpty(List<String?> values) {
+  /// Shared trim helper for activation string fields.
+  static String? firstNonEmpty(List<String?> values) {
     for (final String? value in values) {
       if (value != null && value.trim().isNotEmpty) {
         return value.trim();
@@ -174,9 +238,16 @@ class UserSessionEntity extends Equatable {
     company,
     retailChannelTableRecId,
     retailChannelId,
+    retailChannelName,
     channelType,
     inventLocation,
     inventLocationDataAreaId,
+    inventLocationDataAreaName,
+    userInfoCompany,
+    userInfoCompanyName,
+    displayCompanyName,
+    displayWarehouseName,
+    activeWarehouseName,
     currency,
     defaultCustAccount,
     defaultCustDataAreaId,

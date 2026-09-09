@@ -22,20 +22,28 @@ class OrderCardSkeleton extends StatelessWidget {
       child: const Row(
         children: <Widget>[
           ShimmerBox(
-            width: 40,
-            height: 40,
-            borderRadius: BorderRadius.all(Radius.circular(20)),
+            width: AppDimensions.shimmerAvatar,
+            height: AppDimensions.shimmerAvatar,
+            borderRadius: BorderRadius.all(
+              Radius.circular(AppDimensions.shimmerAvatar / 2),
+            ),
           ),
           SizedBox(width: AppDimensions.space12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                ShimmerBox(width: 120, height: 16),
+                ShimmerBox(width: 120, height: AppDimensions.iconSm),
                 SizedBox(height: AppDimensions.spaceSm),
-                ShimmerBox(width: 180, height: 12),
+                ShimmerBox(
+                  width: AppDimensions.shimmerSubtitleWidth,
+                  height: AppDimensions.shimmerLineSm,
+                ),
                 SizedBox(height: AppDimensions.spaceSm),
-                ShimmerBox(width: 80, height: 20),
+                ShimmerBox(
+                  width: AppDimensions.shimmerChipWidth,
+                  height: AppDimensions.shimmerChipHeight,
+                ),
               ],
             ),
           ),

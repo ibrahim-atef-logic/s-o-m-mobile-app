@@ -15,9 +15,22 @@ abstract class SalesOrdersRepository {
     required String company,
   });
 
+  Future<Either<Failure, SalesOrderHeaderEntity>> refreshOrder({
+    required String salesId,
+    required String company,
+  });
+
   Future<Either<Failure, List<SalesOrderLineEntity>>> getOrderLines({
     required String salesId,
     required String company,
+    int top,
+    int skip,
+  });
+
+  Future<Either<Failure, void>> deleteOrderLine({
+    required String salesId,
+    required String company,
+    required int recordId,
   });
 
   Future<Either<Failure, CreatedOrderEntity>> createOrder({

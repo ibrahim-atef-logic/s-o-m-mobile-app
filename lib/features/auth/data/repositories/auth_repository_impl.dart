@@ -119,6 +119,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, UserSessionEntity>> persistWarehouse({
     required String inventLocationId,
     String? dataAreaId,
+    String? warehouseDisplayName,
   }) async {
     final String warehouse = inventLocationId.trim();
     if (warehouse.isEmpty) {
@@ -134,6 +135,7 @@ class AuthRepositoryImpl implements AuthRepository {
       session.user.toEntity(),
       inventLocationId: warehouse,
       dataAreaId: dataAreaId,
+      warehouseDisplayName: warehouseDisplayName,
     );
     _store.save(session.copyWith(user: UserSessionModel.fromEntity(updated)));
     return Right<Failure, UserSessionEntity>(updated);

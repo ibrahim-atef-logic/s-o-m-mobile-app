@@ -141,4 +141,39 @@ void main() {
     expect(body.containsKey('personnelNumber'), isFalse);
     expect(body.containsKey('inventLocationId'), isFalse);
   });
+
+  test('deleteOrderLine hits lines/{recordId} with company query', () async {
+    when(
+      () => dio.delete<dynamic>(
+        any(),
+        queryParameters: any(named: 'queryParameters'),
+      ),
+    ).thenAnswer(
+      (_) async => Response<dynamic>(
+        requestOptions: RequestOptions(path: ''),
+        statusCode: 200,
+        data: <String, dynamic>{
+          'success': true,
+          'data': <String, Object>{
+            'salesId': 'MM-245531',
+            'recordId': 123,
+            'deleted': true,
+          },
+        },
+      ),
+    );
+
+    await sut.deleteOrderLine(
+      salesId: 'MM-245531',
+      company: 'mm',
+      recordId: 123,
+    );
+
+    verify(
+      () => dio.delete<dynamic>(
+        '/api/v1/sales-orders/MM-245531/lines/123',
+        queryParameters: <String, String>{'company': 'mm'},
+      ),
+    ).called(1);
+  });
 }

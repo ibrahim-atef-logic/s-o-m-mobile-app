@@ -4,7 +4,7 @@ import 'package:logic_retail_mobile/features/auth/domain/entities/user_session_e
 
 import '../../helpers/fixtures.dart';
 
-/// Decides whether the warehouse picker must block the app after login.
+/// Warehouse presence on the login session. The picker is create-order only.
 void main() {
   UserSessionEntity session(Map<String, dynamic> json) =>
       UserSessionModel.fromJson(json).toEntity();
@@ -18,7 +18,7 @@ void main() {
     expect(user.warehouseMissing, isFalse);
   });
 
-  test('12344 has no warehouse, so the picker must open', () {
+  test('12344 has no warehouse, so create-order must open the picker', () {
     final UserSessionEntity user = session(Fixtures.sampleActivationUser12344);
 
     expect(user.operatingCompany, 'PLTR');

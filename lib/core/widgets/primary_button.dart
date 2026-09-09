@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_dimensions.dart';
+import '../theme/app_gradients.dart';
+import '../theme/app_shadows.dart';
+import '../theme/app_text_styles.dart';
 
-/// Primary filled action button with built-in loading spinner.
+/// Primary action button: brand gradient, tight lift, built-in loading spinner.
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     required this.label,
@@ -20,17 +23,40 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    final bool inactive = onPressed == null || isLoading;
+    return Container(
       width: double.infinity,
       height: AppDimensions.primaryButtonHeight,
+      decoration: BoxDecoration(
+        gradient: inactive ? null : AppGradients.brandVivid,
+        color: inactive ? AppColors.neutral200 : null,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+        boxShadow: inactive ? null : AppShadows.brand,
+      ),
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          disabledBackgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          foregroundColor: AppColors.textInverse,
+          disabledForegroundColor: AppColors.neutral600,
+          elevation: 0,
+          textStyle: AppTextStyles.label.copyWith(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.2,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
+          ),
+        ),
         child: isLoading
             ? const SizedBox(
-                height: 22,
-                width: 22,
+                height: AppDimensions.spinnerMd,
+                width: AppDimensions.spinnerMd,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
+                  strokeWidth: AppDimensions.spinnerStroke,
                   color: AppColors.textInverse,
                 ),
               )

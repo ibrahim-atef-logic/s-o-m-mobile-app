@@ -16,10 +16,12 @@ class SelectWarehouseUseCase {
   Future<Either<Failure, UserSessionEntity>> call({
     required String inventLocationId,
     String? dataAreaId,
+    String? warehouseDisplayName,
   }) {
     return _repository.persistWarehouse(
       inventLocationId: inventLocationId,
       dataAreaId: dataAreaId,
+      warehouseDisplayName: warehouseDisplayName,
     );
   }
 }

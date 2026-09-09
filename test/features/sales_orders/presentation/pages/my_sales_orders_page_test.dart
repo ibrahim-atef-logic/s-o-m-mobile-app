@@ -123,7 +123,7 @@ void main() {
     expect(find.bySemanticsLabel('New sales order'), findsWidgets);
   });
 
-  testWidgets('incomplete warehouse session still loads home with banner', (
+  testWidgets('incomplete warehouse session still loads home', (
     WidgetTester tester,
   ) async {
     when(() => authBloc.state).thenReturn(
@@ -155,7 +155,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('No warehouse is assigned'), findsOneWidget);
+    expect(find.textContaining('No warehouse is assigned'), findsNothing);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
     verify(() => salesBloc.add(const SalesOrdersRequested('PLTR'))).called(1);
   });
 }

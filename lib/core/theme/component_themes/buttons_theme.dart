@@ -6,6 +6,12 @@ import '../app_text_styles.dart';
 
 /// Elevated / filled / outlined / text / icon button themes.
 abstract final class ButtonsTheme {
+  static final TextStyle _buttonLabel = AppTextStyles.label.copyWith(
+    fontSize: 15,
+    fontWeight: FontWeight.w700,
+    letterSpacing: 0.2,
+  );
+
   static ElevatedButtonThemeData elevated() {
     return ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -13,12 +19,12 @@ abstract final class ButtonsTheme {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textInverse,
         disabledBackgroundColor: AppColors.neutral200,
-        disabledForegroundColor: AppColors.textTertiary,
+        disabledForegroundColor: AppColors.neutral600,
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
         ),
-        textStyle: AppTextStyles.label.copyWith(fontSize: 15),
+        textStyle: _buttonLabel,
         padding: const EdgeInsets.symmetric(
           horizontal: AppDimensions.spaceLg,
           vertical: AppDimensions.spaceMd,
@@ -36,7 +42,7 @@ abstract final class ButtonsTheme {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
         ),
-        textStyle: AppTextStyles.label.copyWith(fontSize: 15),
+        textStyle: _buttonLabel,
       ),
     );
   }
@@ -46,11 +52,12 @@ abstract final class ButtonsTheme {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(AppDimensions.primaryButtonHeight),
         foregroundColor: AppColors.primary,
-        side: const BorderSide(color: AppColors.border, width: 1.5),
+        backgroundColor: AppColors.surface,
+        side: const BorderSide(color: AppColors.primary, width: 1.5),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppDimensions.radiusMd),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusLg),
         ),
-        textStyle: AppTextStyles.label.copyWith(fontSize: 15),
+        textStyle: _buttonLabel,
       ),
     );
   }

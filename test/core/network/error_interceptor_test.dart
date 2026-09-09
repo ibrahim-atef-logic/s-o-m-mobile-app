@@ -19,8 +19,7 @@ class _FixedAdapter implements HttpClientAdapter {
     RequestOptions options,
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
-  ) =>
-      _handler(options);
+  ) => _handler(options);
 }
 
 Dio _dioWith(HttpClientAdapter adapter) {
@@ -59,7 +58,10 @@ void main() {
       fail('expected DioException');
     } on DioException catch (e) {
       expect(e.error, isA<AuthException>());
-      expect((e.error! as AuthException).message, 'UNAUTHORIZED: Missing token');
+      expect(
+        (e.error! as AuthException).message,
+        'UNAUTHORIZED: Missing token',
+      );
     }
   });
 
@@ -124,6 +126,56 @@ void main() {
       expect(
         (e.error! as ServerException).message,
         'NO_PRICE: Price not found',
+      );
+    }
+  });
+
+  test('keeps the full D365 infolog on DYNAMICS_ERROR', () async {
+    const String infolog =
+        "Write failed for table row of type 'SalesOrderHeaderV4Entity'. "
+        'Infolog: Warning: Customer 10-10002 is stopped for All.';
+    final Dio dio = _dioWith(
+      _FixedAdapter(
+        (_) async => _jsonBody(400, <String, dynamic>{
+          'success': false,
+          'error': <String, dynamic>{
+            'code': 'DYNAMICS_ERROR',
+            'message': infolog,
+          },
+        }),
+      ),
+    );
+
+    try {
+      await dio.post<dynamic>('/api/v1/sales-orders');
+      fail('expected DioException');
+    } on DioException catch (e) {
+      expect(e.error, isA<ServerException>());
+      expect((e.error! as ServerException).message, 'DYNAMICS_ERROR: $infolog');
+    }
+  });
+
+  test('maps 409 LINE_ALREADY_EXISTS into ServerException message', () async {
+    final Dio dio = _dioWith(
+      _FixedAdapter(
+        (_) async => _jsonBody(409, <String, dynamic>{
+          'success': false,
+          'error': <String, dynamic>{
+            'code': 'LINE_ALREADY_EXISTS',
+            'message': 'Item BG410.003 is already on sales order MM-245265.',
+          },
+        }),
+      ),
+    );
+
+    try {
+      await dio.post<dynamic>('/api/v1/sales-orders/MM-245265/lines/full');
+      fail('expected DioException');
+    } on DioException catch (e) {
+      expect(e.error, isA<ServerException>());
+      expect(
+        (e.error! as ServerException).message,
+        'LINE_ALREADY_EXISTS: Item BG410.003 is already on sales order MM-245265.',
       );
     }
   });

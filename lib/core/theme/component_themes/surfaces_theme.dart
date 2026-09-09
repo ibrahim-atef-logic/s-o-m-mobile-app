@@ -8,16 +8,13 @@ import '../app_text_styles.dart';
 /// AppBar, card, chip, dialog, snackBar, and related surface themes.
 abstract final class SurfacesTheme {
   static AppBarTheme appBar() {
-    return const AppBarTheme(
+    return AppBarTheme(
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.textInverse,
       elevation: 0,
       centerTitle: false,
       systemOverlayStyle: SystemUiOverlayStyle.light,
-      titleTextStyle: TextStyle(
-        fontFamily: AppTextStyles.fontFamily,
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
+      titleTextStyle: AppTextStyles.titleLg.copyWith(
         color: AppColors.textInverse,
       ),
     );

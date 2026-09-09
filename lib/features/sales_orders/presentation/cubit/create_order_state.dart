@@ -8,8 +8,8 @@ part of 'create_order_cubit.dart';
 final class CreateOrderState extends Equatable {
   const CreateOrderState({
     this.company = '',
+    this.companyDisplayName = '',
     this.warehouse,
-    this.currency,
     this.customer,
     this.resolvingCustomer = false,
     this.submitting = false,
@@ -19,30 +19,37 @@ final class CreateOrderState extends Equatable {
     this.createdOrder,
   });
 
+  /// DataArea code for APIs — never send the display name.
   final String company;
+
+  /// Human label for UI (falls back to [company] when D365 names are null).
+  final String companyDisplayName;
   final String? warehouse;
-  final String? currency;
   final CustomerEntity? customer;
   final bool resolvingCustomer;
   final bool submitting;
   final Failure? failure;
   final String? customerError;
 
-  /// Backend answered `WAREHOUSE_REQUIRED`; the picker has to run first.
+  /// True when the user has no warehouse yet, or the backend asked for one.
   final bool warehouseRequired;
 
   /// Set once the order exists in D365; the screen then navigates to it.
   final SalesOrderHeaderEntity? createdOrder;
 
+  String get companyLabel =>
+      companyDisplayName.trim().isEmpty ? company : companyDisplayName;
+
   bool get canSubmit =>
       !submitting &&
       company.isNotEmpty &&
+      (warehouse?.trim().isNotEmpty ?? false) &&
       (customer?.customerAccount.isNotEmpty ?? false);
 
   CreateOrderState copyWith({
     String? company,
+    String? companyDisplayName,
     String? warehouse,
-    String? currency,
     CustomerEntity? customer,
     bool? resolvingCustomer,
     bool? submitting,
@@ -53,8 +60,8 @@ final class CreateOrderState extends Equatable {
   }) {
     return CreateOrderState(
       company: company ?? this.company,
+      companyDisplayName: companyDisplayName ?? this.companyDisplayName,
       warehouse: warehouse ?? this.warehouse,
-      currency: currency ?? this.currency,
       customer: customer ?? this.customer,
       resolvingCustomer: resolvingCustomer ?? this.resolvingCustomer,
       submitting: submitting ?? this.submitting,
@@ -68,8 +75,8 @@ final class CreateOrderState extends Equatable {
   @override
   List<Object?> get props => <Object?>[
     company,
+    companyDisplayName,
     warehouse,
-    currency,
     customer,
     resolvingCustomer,
     submitting,

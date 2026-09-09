@@ -31,7 +31,11 @@ abstract final class JsonMap {
   static String? stringOrNull(Map<String, dynamic> json, String key) =>
       JsonString.trimOrNull(value(json, key));
 
-  static int integer(Map<String, dynamic> json, String key, {int fallback = 0}) {
+  static int integer(
+    Map<String, dynamic> json,
+    String key, {
+    int fallback = 0,
+  }) {
     return integerOrNull(json, key) ?? fallback;
   }
 
@@ -46,7 +50,11 @@ abstract final class JsonMap {
     return null;
   }
 
-  static bool flag(Map<String, dynamic> json, String key, {bool fallback = false}) {
+  static bool flag(
+    Map<String, dynamic> json,
+    String key, {
+    bool fallback = false,
+  }) {
     final Object? raw = value(json, key);
     if (raw is bool) {
       return raw;

@@ -21,9 +21,7 @@ class AuthResponseModel {
       accessToken: JsonMap.string(json, 'accessToken'),
       refreshToken: JsonMap.string(json, 'refreshToken'),
       user: UserSessionModel.fromJson(
-        userRaw is Map<String, dynamic>
-            ? userRaw
-            : <String, dynamic>{},
+        userRaw is Map<String, dynamic> ? userRaw : <String, dynamic>{},
       ),
     );
   }

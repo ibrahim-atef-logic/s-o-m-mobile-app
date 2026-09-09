@@ -74,6 +74,8 @@ void main() {
       expect(session.resolvedWarehouse, Fixtures.warehouse);
       expect(session.defaultCustAccount, '10-10002');
       expect(session.retailChannelId, '912');
+      expect(session.retailChannelName, 'سلة المواد الغذائية المخفضة');
+      expect(session.displayBranchLabel, 'سلة المواد الغذائية المخفضة');
       expect(session.currency, 'SAR');
       expect(session.workerRecId, 5637227826);
       expect(session.warehouseMissing, isFalse);
@@ -90,15 +92,14 @@ void main() {
       await catalog.resolvePrice(
         itemNumber: Fixtures.itemNumber,
         company: company,
-        custAccount: Fixtures.custAccount,
-        priceGroup: 'RETAIL',
-        unitId: 'pcs',
+        salesUnitId: 'pcs',
+        warehouseId: Fixtures.warehouse,
+        channelRecId: session.retailChannelTableRecId,
       );
       await catalog.resolvePrice(
         itemNumber: Fixtures.itemNumber,
         company: company,
-        custAccount: session.defaultCustAccount!,
-        priceGroup: '',
+        salesUnitId: 'pcs',
       );
       await catalog.getOnHand(
         itemNumber: Fixtures.itemNumber,

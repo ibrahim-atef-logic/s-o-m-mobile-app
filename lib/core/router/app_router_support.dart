@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../l10n/app_localizations.dart';
@@ -21,7 +22,13 @@ class MissingRouteScaffold extends StatelessWidget {
       MissingRouteKind.session => l10n.errorMissingSession,
     };
     return Scaffold(
-      body: AppEmptyView(title: message, icon: Icons.warning_amber_outlined),
+      appBar: AppBar(title: Text(l10n.mySalesOrders)),
+      body: AppEmptyView(
+        title: message,
+        icon: Icons.warning_amber_outlined,
+        actionLabel: l10n.mySalesOrders,
+        onAction: () => context.go('/orders'),
+      ),
     );
   }
 }

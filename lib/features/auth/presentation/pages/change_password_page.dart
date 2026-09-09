@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/theme/app_gradients.dart';
+import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_gradient_app_bar.dart';
+import '../../../../core/widgets/app_hero_header.dart';
+import '../../../../core/widgets/app_password_field.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../l10n/app_localizations.dart';
@@ -32,88 +37,124 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.changePassword)),
+      appBar: AppGradientAppBar(title: Text(l10n.changePassword)),
       body: BlocConsumer<ChangePasswordCubit, ChangePasswordState>(
         listener: (BuildContext context, ChangePasswordState state) {
           if (state is ChangePasswordSuccess) {
             showAppSnackBar(
               context,
-              message: state.message.isEmpty ? l10n.passwordChanged : state.message,
+              message: l10n.passwordChanged,
               type: AppSnackBarType.success,
             );
           } else if (state is ChangePasswordFailure) {
-            showFailureSnackBar(context, state.failure, l10n: l10n);
+            showAppSnackBar(
+              context,
+              message: l10n.errorPasswordChangeFailed,
+              type: AppSnackBarType.error,
+            );
           }
         },
         builder: (BuildContext context, ChangePasswordState state) {
           final bool loading = state is ChangePasswordSubmitting;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppDimensions.spaceLg),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  TextFormField(
-                    controller: _old,
-                    obscureText: true,
-                    decoration: InputDecoration(labelText: l10n.oldPassword),
-                    validator: (String? v) {
-                      if (v == null || v.isEmpty) {
-                        return l10n.errorPasswordRequired;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppDimensions.spaceMd),
-                  TextFormField(
-                    controller: _new,
-                    obscureText: true,
-                    decoration: InputDecoration(labelText: l10n.newPassword),
-                    validator: (String? v) {
-                      if (v == null || v.isEmpty) {
-                        return l10n.errorPasswordRequired;
-                      }
-                      if (v == _old.text) {
-                        return l10n.errorPasswordSameAsOld;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppDimensions.spaceMd),
-                  TextFormField(
-                    controller: _confirm,
-                    obscureText: true,
-                    decoration: InputDecoration(labelText: l10n.confirmPassword),
-                    validator: (String? v) {
-                      if (v == null || v.isEmpty) {
-                        return l10n.errorPasswordRequired;
-                      }
-                      if (v != _new.text) {
-                        return l10n.errorPasswordMismatch;
-                      }
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: AppDimensions.spaceXl),
-                  PrimaryButton(
-                    label: l10n.save,
-                    isLoading: loading,
-                    onPressed: () {
-                      if (!_formKey.currentState!.validate()) return;
-                      context.read<ChangePasswordCubit>().submit(
-                        oldPassword: _old.text,
-                        newPassword: _new.text,
-                        confirmPassword: _confirm.text,
-                      );
-                    },
-                  ),
-                ],
+          return DecoratedBox(
+            decoration: const BoxDecoration(gradient: AppGradients.pageWash),
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    AppHeroHeader(
+                      title: l10n.changePassword,
+                      subtitle: l10n.profileTitle,
+                      icon: Icons.lock_reset_outlined,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(AppDimensions.spaceLg),
+                      child: AppCard(
+                        margin: EdgeInsets.zero,
+                        padding: const EdgeInsets.all(AppDimensions.spaceLg),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            AppPasswordField(
+                              controller: _old,
+                              labelText: l10n.oldPassword,
+                              textInputAction: TextInputAction.next,
+                              autofillHints: const <String>[
+                                AutofillHints.password,
+                              ],
+                              validator: (String? v) {
+                                if (v == null || v.isEmpty) {
+                                  return l10n.errorPasswordRequired;
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppDimensions.spaceMd),
+                            AppPasswordField(
+                              controller: _new,
+                              labelText: l10n.newPassword,
+                              textInputAction: TextInputAction.next,
+                              autofillHints: const <String>[
+                                AutofillHints.newPassword,
+                              ],
+                              validator: (String? v) {
+                                if (v == null || v.isEmpty) {
+                                  return l10n.errorPasswordRequired;
+                                }
+                                if (v == _old.text) {
+                                  return l10n.errorPasswordSameAsOld;
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppDimensions.spaceMd),
+                            AppPasswordField(
+                              controller: _confirm,
+                              labelText: l10n.confirmPassword,
+                              textInputAction: TextInputAction.done,
+                              autofillHints: const <String>[
+                                AutofillHints.newPassword,
+                              ],
+                              onSubmitted: (_) => _submit(context),
+                              validator: (String? v) {
+                                if (v == null || v.isEmpty) {
+                                  return l10n.errorPasswordRequired;
+                                }
+                                if (v != _new.text) {
+                                  return l10n.errorPasswordMismatch;
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: AppDimensions.spaceLg),
+                            PrimaryButton(
+                              label: l10n.save,
+                              isLoading: loading,
+                              icon: Icons.check,
+                              onPressed: () => _submit(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  void _submit(BuildContext context) {
+    if (!_formKey.currentState!.validate()) return;
+    context.read<ChangePasswordCubit>().submit(
+      oldPassword: _old.text,
+      newPassword: _new.text,
+      confirmPassword: _confirm.text,
     );
   }
 }

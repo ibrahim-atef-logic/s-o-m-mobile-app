@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../extensions/theme_context.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_dimensions.dart';
-import '../theme/app_text_styles.dart';
 
 enum StatusChipTone { success, warning, danger, info, neutral }
 
@@ -46,20 +46,41 @@ class StatusChip extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppDimensions.space12,
-        vertical: AppDimensions.spaceXs,
+      padding: const EdgeInsetsDirectional.only(
+        start: AppDimensions.spaceSm,
+        end: AppDimensions.space12,
+        top: AppDimensions.spaceXs,
+        bottom: AppDimensions.spaceXs,
       ),
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(AppDimensions.radiusPill),
-      ),
-      child: Text(
-        label,
-        style: AppTextStyles.caption.copyWith(
-          color: fg,
-          fontWeight: FontWeight.w600,
+        border: Border.all(
+          color: fg.withValues(alpha: 0.18),
+          width: AppDimensions.strokeHairline,
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            width: AppDimensions.spaceSm,
+            height: AppDimensions.spaceSm,
+            decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: AppDimensions.spaceXs),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: context.textTheme.labelSmall?.copyWith(
+                color: fg,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,26 +1,27 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
-import '../entities/customer_entity.dart';
+import '../entities/customer_page_result.dart';
 import '../repositories/customer_repository.dart';
 
-/// Searches customers of the operating DataArea by account number or name.
+/// Searches customers of the operating DataArea (account, prefix, name, phone, city).
 class SearchCustomersUseCase {
   const SearchCustomersUseCase(this._repository);
 
-  static const int defaultTop = 50;
+  static const int defaultTop = 30;
 
   final CustomerRepository _repository;
 
-  Future<Either<Failure, List<CustomerEntity>>> call({
+  Future<Either<Failure, CustomerPageResult>> call({
     required String company,
     String? search,
     int top = defaultTop,
+    int skip = 0,
   }) {
     final String dataArea = company.trim();
     if (dataArea.isEmpty) {
-      return Future<Either<Failure, List<CustomerEntity>>>.value(
-        const Left<Failure, List<CustomerEntity>>(
+      return Future<Either<Failure, CustomerPageResult>>.value(
+        const Left<Failure, CustomerPageResult>(
           ValidationFailure('COMPANY_REQUIRED'),
         ),
       );
@@ -29,6 +30,7 @@ class SearchCustomersUseCase {
       company: dataArea,
       search: search,
       top: top,
+      skip: skip,
     );
   }
 }

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/extensions/theme_context.dart';
 import '../../../../core/l10n/failure_l10n.dart';
-import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_gradients.dart';
+import '../../../../core/widgets/app_gradient_app_bar.dart';
 import '../../../../core/widgets/language_switcher.dart';
 import '../../../../core/widgets/skeletons/list_skeleton.dart';
 import '../../../../core/widgets/skeletons/order_card_skeleton.dart';
@@ -14,7 +17,6 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/sales_order_header_entity.dart';
 import '../bloc/sales_orders_bloc.dart';
 import '../widgets/orders_list_body.dart';
-import '../widgets/warehouse_missing_banner.dart';
 
 class MySalesOrdersPage extends StatefulWidget {
   const MySalesOrdersPage({super.key});
@@ -63,7 +65,7 @@ class _MySalesOrdersPageState extends State<MySalesOrdersPage> {
     final AppLocalizations l10n = AppLocalizations.of(context);
     if (_companyCode == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.mySalesOrders)),
+        appBar: AppGradientAppBar(title: Text(l10n.mySalesOrders)),
         body: AppErrorView(
           title: l10n.errorValidation,
           message: l10n.errorCompanyRequired,
@@ -75,15 +77,17 @@ class _MySalesOrdersPageState extends State<MySalesOrdersPage> {
     }
     final UserSessionEntity? session = _session;
     return Scaffold(
-      appBar: AppBar(
+      appBar: AppGradientAppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(l10n.mySalesOrders),
             if (session != null)
               Text(
-                '${session.displayOrDash(session.operatingCompany)} / ${session.displayOrDash(session.resolvedWarehouse)}',
-                style: AppTextStyles.bodySm,
+                '${session.displayOrDash(session.resolvedDisplayCompanyName)} / ${session.displayOrDash(session.resolvedDisplayWarehouseName)}',
+                style: context.textTheme.labelSmall?.copyWith(
+                  color: AppColors.textInverse.withValues(alpha: 0.82),
+                ),
               ),
           ],
         ),
@@ -114,40 +118,39 @@ class _MySalesOrdersPageState extends State<MySalesOrdersPage> {
       floatingActionButton: Semantics(
         label: l10n.newSalesOrder,
         button: true,
-        child: FloatingActionButton(
+        child: FloatingActionButton.extended(
           tooltip: l10n.newSalesOrder,
           onPressed: _createOrder,
-          child: const Icon(Icons.add),
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.textInverse,
+          icon: const Icon(Icons.add),
+          label: Text(l10n.newSalesOrder, overflow: TextOverflow.ellipsis),
         ),
       ),
-      body: Column(
-        children: <Widget>[
-          if (session != null && session.warehouseMissing)
-            const WarehouseMissingBanner(),
-          Expanded(
-            child: BlocBuilder<SalesOrdersBloc, SalesOrdersState>(
-              builder: (BuildContext context, SalesOrdersState state) {
-                return switch (state) {
-                  SalesOrdersInitial() || SalesOrdersLoading() => ListSkeleton(
-                    itemBuilder: (_, int index) => const OrderCardSkeleton(),
-                  ),
-                  SalesOrdersFailure(:final failure) => AppErrorView(
-                    title: failure.localizedTitle(l10n),
-                    message: failure.localizedMessage(l10n),
-                    details: failure.technicalDetails,
-                    onRetry: _load,
-                  ),
-                  SalesOrdersLoaded(:final orders) => OrdersListBody(
-                    orders: orders,
-                    query: _query,
-                    onQueryChanged: (String v) => setState(() => _query = v),
-                    onRefresh: _load,
-                  ),
-                };
-              },
-            ),
-          ),
-        ],
+      body: DecoratedBox(
+        decoration: const BoxDecoration(gradient: AppGradients.pageWash),
+        child: BlocBuilder<SalesOrdersBloc, SalesOrdersState>(
+          builder: (BuildContext context, SalesOrdersState state) {
+            return switch (state) {
+              SalesOrdersInitial() || SalesOrdersLoading() => ListSkeleton(
+                itemBuilder: (_, int index) => const OrderCardSkeleton(),
+              ),
+              SalesOrdersFailure(:final failure) => AppErrorView(
+                title: failure.localizedTitle(l10n),
+                message: failure.localizedMessage(l10n),
+                details: failure.technicalDetails,
+                onRetry: _load,
+              ),
+              SalesOrdersLoaded(:final orders) => OrdersListBody(
+                orders: orders,
+                query: _query,
+                onQueryChanged: (String v) => setState(() => _query = v),
+                onRefresh: _load,
+                onCreateOrder: _createOrder,
+              ),
+            };
+          },
+        ),
       ),
     );
   }

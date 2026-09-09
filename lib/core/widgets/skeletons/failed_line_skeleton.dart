@@ -22,11 +22,14 @@ class FailedLineSkeleton extends StatelessWidget {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ShimmerBox(width: 140, height: 16),
+          ShimmerBox(
+            width: AppDimensions.shimmerTitleWidth,
+            height: AppDimensions.iconSm,
+          ),
           SizedBox(height: AppDimensions.spaceSm),
-          ShimmerBox(height: 12),
+          ShimmerBox(height: AppDimensions.shimmerLineSm),
           SizedBox(height: AppDimensions.spaceXs),
-          ShimmerBox(width: 200, height: 12),
+          ShimmerBox(width: 200, height: AppDimensions.shimmerLineSm),
         ],
       ),
     );

@@ -29,16 +29,19 @@ void showAppSnackBar(
       SnackBar(
         backgroundColor: bg,
         behavior: SnackBarBehavior.floating,
-        duration: duration ??
+        duration:
+            duration ??
             (type == AppSnackBarType.error
-                ? const Duration(seconds: 5)
-                : const Duration(seconds: 3)),
+                ? AppDimensions.snackBarLong
+                : AppDimensions.snackBarShort),
         margin: const EdgeInsetsDirectional.all(AppDimensions.spaceMd),
         content: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(top: 2),
+              padding: const EdgeInsetsDirectional.only(
+                top: AppDimensions.space2,
+              ),
               child: Icon(
                 icon,
                 color: AppColors.textInverse,
@@ -51,7 +54,9 @@ void showAppSnackBar(
                 message,
                 maxLines: lines.clamp(1, 4),
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: AppColors.textInverse, height: 1.35),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textInverse),
               ),
             ),
           ],

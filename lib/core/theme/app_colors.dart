@@ -5,6 +5,11 @@ abstract final class AppColors {
   // Brand
   static const Color primary = Color(0xFF0B5F7D);
   static const Color primaryDark = Color(0xFF073B52);
+
+  /// Upper/lower stops of the primary CTA gradient. Both stay dark enough for
+  /// white text to remain legible (WCAG AA at 15sp).
+  static const Color primaryLight = Color(0xFF0E7595);
+  static const Color primaryDeep = Color(0xFF0A5470);
   static const Color primaryContainer = Color(0xFFDCEFF6);
   static const Color accent = Color(0xFF00A6CE);
 
@@ -31,17 +36,30 @@ abstract final class AppColors {
   static const Color neutral900 = Color(0xFF121A21);
 
   // Surfaces
-  static const Color background = Color(0xFFF3F6F8);
+  static const Color background = Color(0xFFF1F5F8);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color surfaceMuted = Color(0xFFF6F8FA);
+  static const Color surfaceSunken = Color(0xFFE9EFF4);
   static const Color border = Color(0xFFD7E0E5);
+  static const Color borderSoft = Color(0xFFE6EDF2);
   static const Color divider = Color(0xFFE8EEF2);
+
+  /// Faint brand-tinted wash used at the top of scrollable pages.
+  static const Color brandWash = Color(0xFFE7F1F6);
+  static const Color accentContainer = Color(0xFFD9F1F9);
 
   // Text
   static const Color textPrimary = Color(0xFF1F2A33);
   static const Color textSecondary = Color(0xFF4B5A66);
   static const Color textTertiary = Color(0xFF6B7A87);
   static const Color textInverse = Color(0xFFFFFFFF);
+
+  // Text on semantic containers
+  static const Color onPrimaryContainer = primaryDark;
+  static const Color onSuccessContainer = Color(0xFF0A4D38);
+  static const Color onWarningContainer = Color(0xFF6B3F00);
+  static const Color onDangerContainer = Color(0xFF7A1812);
+  static const Color onInfoContainer = Color(0xFF0E456F);
 
   // Legacy aliases used by existing screens
   static const Color error = danger;

@@ -3,6 +3,7 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../entities/sales_order_header_entity.dart';
 import '../repositories/sales_orders_repository.dart';
+import '../sales_orders_sort.dart';
 
 class GetMySalesOrdersUseCase {
   const GetMySalesOrdersUseCase(this._repository);
@@ -19,6 +20,10 @@ class GetMySalesOrdersUseCase {
         ),
       );
     }
-    return _repository.getMyOrders(company: company.trim());
+    return _repository.getMyOrders(company: company.trim()).then((
+      Either<Failure, List<SalesOrderHeaderEntity>> result,
+    ) {
+      return result.map(SalesOrdersSort.apply);
+    });
   }
 }

@@ -1,12 +1,9 @@
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 
-/// Route the app is forced to while a session has no warehouse.
+/// Warehouse picker route. Opened from create-order, never as a login gate.
 const String kWarehouseGateRoute = '/warehouse';
 
 /// Resolves the router redirect for [location] from the current [state].
-///
-/// Why: a session without a warehouse cannot resolve inventory or create-SO
-/// calls, so the warehouse picker blocks the app until one is picked.
 String? resolveAuthRedirect({
   required AuthState state,
   required String location,
@@ -20,9 +17,7 @@ String? resolveAuthRedirect({
     return onAuth ? null : '/hello';
   }
   if (state is AuthAuthenticated) {
-    if (state.session.warehouseMissing) {
-      return location == kWarehouseGateRoute ? null : kWarehouseGateRoute;
-    }
+    // Missing warehouse is not a login gate; the picker only opens on create-SO.
     if (onAuth || location == '/company') {
       return '/orders';
     }

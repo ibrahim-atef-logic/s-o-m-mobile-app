@@ -30,6 +30,7 @@ void main() {
     expect(sut.session?.user.activeWarehouse, 'MMS000WH');
     expect(sut.session?.user.defaultCustAccount, '10-10002');
     expect(sut.session?.user.retailChannelId, '912');
+    expect(sut.session?.user.retailChannelName, 'سلة المواد الغذائية المخفضة');
     expect(sut.session?.user.currency, 'SAR');
     expect(sut.session?.user.workerRecId, 5637227826);
   });

@@ -25,26 +25,54 @@ final class CustomerPickerLoaded extends CustomerPickerState {
     required this.customers,
     this.query = '',
     this.searching = false,
+    this.loadingMore = false,
+    this.hasMore = false,
+    this.skip = 0,
+    this.top = SearchCustomersUseCase.defaultTop,
+    this.totalCount,
   });
 
   final List<CustomerEntity> customers;
   final String query;
-
-  /// A debounced search is in flight while the previous results stay visible.
   final bool searching;
+  final bool loadingMore;
+  final bool hasMore;
+  final int skip;
+  final int top;
+  final int? totalCount;
 
   CustomerPickerLoaded copyWith({
     List<CustomerEntity>? customers,
     String? query,
     bool? searching,
+    bool? loadingMore,
+    bool? hasMore,
+    int? skip,
+    int? top,
+    int? totalCount,
+    bool clearTotalCount = false,
   }) {
     return CustomerPickerLoaded(
       customers: customers ?? this.customers,
       query: query ?? this.query,
       searching: searching ?? this.searching,
+      loadingMore: loadingMore ?? this.loadingMore,
+      hasMore: hasMore ?? this.hasMore,
+      skip: skip ?? this.skip,
+      top: top ?? this.top,
+      totalCount: clearTotalCount ? null : (totalCount ?? this.totalCount),
     );
   }
 
   @override
-  List<Object?> get props => <Object?>[customers, query, searching];
+  List<Object?> get props => <Object?>[
+    customers,
+    query,
+    searching,
+    loadingMore,
+    hasMore,
+    skip,
+    top,
+    totalCount,
+  ];
 }

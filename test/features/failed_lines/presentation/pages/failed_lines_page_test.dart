@@ -31,7 +31,9 @@ void main() {
     await GetIt.I.reset();
   });
 
-  testWidgets('shows empty state when no failed lines', (WidgetTester tester) async {
+  testWidgets('shows empty state when no failed lines', (
+    WidgetTester tester,
+  ) async {
     when(
       () => mockUseCase(
         salesId: any(named: 'salesId'),
@@ -39,7 +41,8 @@ void main() {
         mode: any(named: 'mode'),
       ),
     ).thenAnswer(
-      (_) async => const Right<Failure, List<FailedLineEntity>>(<FailedLineEntity>[]),
+      (_) async =>
+          const Right<Failure, List<FailedLineEntity>>(<FailedLineEntity>[]),
     );
 
     await pumpTestApp(
@@ -59,18 +62,17 @@ void main() {
         mode: any(named: 'mode'),
       ),
     ).thenAnswer(
-      (_) async => const Right<Failure, List<FailedLineEntity>>(
-        <FailedLineEntity>[
-          FailedLineEntity(
-            id: 'fl-1',
-            jobId: 'job-1',
-            itemNumber: Fixtures.itemNumber,
-            quantity: 3,
-            status: 'Failed',
-            commentEn: 'Failed',
-          ),
-        ],
-      ),
+      (_) async =>
+          const Right<Failure, List<FailedLineEntity>>(<FailedLineEntity>[
+            FailedLineEntity(
+              id: 'fl-1',
+              jobId: 'job-1',
+              itemNumber: Fixtures.itemNumber,
+              quantity: 3,
+              status: 'Failed',
+              commentEn: 'Failed',
+            ),
+          ]),
     );
 
     await pumpTestApp(

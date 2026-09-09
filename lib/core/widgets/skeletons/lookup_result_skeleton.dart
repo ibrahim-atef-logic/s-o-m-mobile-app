@@ -21,13 +21,16 @@ class LookupResultSkeleton extends StatelessWidget {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ShimmerBox(width: 180, height: 18),
+          ShimmerBox(
+            width: AppDimensions.shimmerSubtitleWidth,
+            height: AppDimensions.shimmerLineLg,
+          ),
           SizedBox(height: AppDimensions.spaceMd),
-          ShimmerBox(height: 14),
+          ShimmerBox(height: AppDimensions.shimmerLineMd),
           SizedBox(height: AppDimensions.spaceSm),
-          ShimmerBox(width: 120, height: 14),
+          ShimmerBox(width: 120, height: AppDimensions.shimmerLineMd),
           SizedBox(height: AppDimensions.spaceSm),
-          ShimmerBox(width: 90, height: 24),
+          ShimmerBox(width: 90, height: AppDimensions.iconMd),
         ],
       ),
     );

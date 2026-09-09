@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/utils/scan_code.dart';
 import '../entities/barcode_item_entity.dart';
 import '../repositories/catalog_repository.dart';
 
@@ -13,7 +14,8 @@ class LookupBarcodeUseCase {
     required String code,
     required String company,
   }) {
-    if (code.trim().isEmpty) {
+    final String sanitized = ScanCode.stripControls(code);
+    if (ScanCode.isBlank(sanitized)) {
       return Future<Either<Failure, BarcodeItemEntity>>.value(
         const Left<Failure, BarcodeItemEntity>(
           ValidationFailure('Barcode is required'),
@@ -27,6 +29,6 @@ class LookupBarcodeUseCase {
         ),
       );
     }
-    return _repository.lookupBarcode(code: code.trim(), company: company);
+    return _repository.lookupBarcode(code: sanitized, company: company);
   }
 }

@@ -19,13 +19,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helloSubtitle =>
-      'Scan, add, and manage sales order lines on the floor';
+      'Create sales orders, scan items, and manage order lines';
 
   @override
   String get login => 'Login';
 
   @override
   String get loginTitle => 'Sign in';
+
+  @override
+  String get loginWelcome => 'Welcome back';
+
+  @override
+  String get loginSubtitle => 'Enter your environment credentials to continue';
+
+  @override
+  String get loginSecureHint =>
+      'Encrypted connection · credentials stay on this device';
 
   @override
   String get logout => 'Logout';
@@ -108,10 +118,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectCustomer => 'Select customer';
 
   @override
-  String get searchCustomers => 'Search by full account number';
+  String get searchCustomers => 'Search by account number or customer name';
 
   @override
-  String get noCustomers => 'No customer found. Enter the full account number.';
+  String get noCustomers => 'No matching customers';
+
+  @override
+  String customersResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count results',
+      one: '1 result',
+      zero: 'No results',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get errorCustomersLoadFailed =>
@@ -130,7 +152,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get salesOrderDetails => 'Sales order details';
 
   @override
-  String get orderSummary => 'Order summary';
+  String get orderSummary => 'Sales order summary';
+
+  @override
+  String get salesStatus => 'Sales status';
+
+  @override
+  String get documentStatus => 'Document status';
+
+  @override
+  String get linesCountLabel => 'Lines';
+
+  @override
+  String get addItems => 'Add items';
+
+  @override
+  String get addItemsDesc => 'Scan and add lines (auto or manual)';
+
+  @override
+  String get submitModeAuto => 'Automatic';
+
+  @override
+  String get submitModeManual => 'Manual';
+
+  @override
+  String get submitModeAutoHint =>
+      'Posts to the order immediately on quantity Enter';
+
+  @override
+  String get submitModeManualHint => 'Review quantity, then tap Add';
+
+  @override
+  String get linePosted => 'Posted';
 
   @override
   String get viewLines => 'View lines';
@@ -166,13 +219,38 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addItem => 'Add item';
 
   @override
-  String get addToCart => 'Add to cart';
+  String get addToCart => 'Add';
+
+  @override
+  String get copyError => 'Copy details';
+
+  @override
+  String get errorCopied => 'Error details copied';
 
   @override
   String get scanBarcode => 'Scan barcode';
 
   @override
   String get scanWithCamera => 'Scan with camera';
+
+  @override
+  String get hideCamera => 'Hide camera';
+
+  @override
+  String get searchByBarcode => 'Barcode';
+
+  @override
+  String get searchByItem => 'Item';
+
+  @override
+  String get deleteLine => 'Delete line';
+
+  @override
+  String get confirmDeleteLine => 'Remove this line from the order?';
+
+  @override
+  String get lineDeletePending =>
+      'Line delete is not available on the server yet';
 
   @override
   String get toggleTorch => 'Toggle torch';
@@ -295,6 +373,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get lineTotal => 'Line total';
 
   @override
+  String get orderTotal => 'Order total';
+
+  @override
   String linesTitle(String salesId) {
     return 'Lines · $salesId';
   }
@@ -357,7 +438,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorAccountDisabled => 'Account is inactive in D365 / mobile';
 
   @override
-  String get errorPasswordChangeFailed => 'Password could not be changed';
+  String get errorPasswordChangeFailed =>
+      'We couldn\'t change your password. Check your current password and try again.';
 
   @override
   String get errorWarehouseNotAssigned =>
@@ -374,6 +456,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileActiveCompany => 'Company';
+
+  @override
+  String get profileWarehouse => 'Warehouse';
+
+  @override
+  String get profileSelectWarehouse => 'Select warehouse';
 
   @override
   String get profileDefaultWarehouse => 'Default warehouse';
@@ -406,6 +494,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'No standard warehouses are available for this company';
 
   @override
+  String get noWarehousesMatchSearch => 'No warehouses match your search';
+
+  @override
   String get errorWarehousesLoadFailed =>
       'Could not load warehouses, please try again';
 
@@ -436,7 +527,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'New password must be different from the current one';
 
   @override
-  String get passwordChanged => 'Password changed';
+  String get passwordChanged => 'Your password was updated successfully.';
 
   @override
   String get errorTimeout => 'Request timed out';
@@ -447,6 +538,31 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorDynamicsUnavailable =>
       'Dynamics environment is unavailable — try again shortly';
+
+  @override
+  String get errorPriceFetchFailed => 'Could not fetch price';
+
+  @override
+  String get errorUnitConversion =>
+      'Unit/price conversion is not available for this product';
+
+  @override
+  String get errorCustomerStopped =>
+      'This customer is stopped in Dynamics and cannot be used for orders';
+
+  @override
+  String get errorLineAlreadyExists =>
+      'This item is already on the sales order';
+
+  @override
+  String get errorItemNotFound => 'Item not found';
+
+  @override
+  String get errorForbiddenCompany =>
+      'This company is not allowed for the current session';
+
+  @override
+  String get errorSoNotOpen => 'This sales order is not open for editing';
 
   @override
   String get errorValidation => 'Please check your input';
@@ -495,4 +611,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get english => 'English';
+
+  @override
+  String get decreaseQuantity => 'Decrease quantity';
+
+  @override
+  String get increaseQuantity => 'Increase quantity';
 }

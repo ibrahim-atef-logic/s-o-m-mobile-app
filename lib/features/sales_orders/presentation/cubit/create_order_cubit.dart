@@ -6,6 +6,7 @@ import '../../../../core/error/api_error_code.dart';
 import '../../../../core/error/failures.dart';
 import '../../../auth/domain/entities/user_session_entity.dart';
 import '../../../customers/domain/entities/customer_entity.dart';
+import '../../../customers/domain/entities/customer_page_result.dart';
 import '../../../customers/domain/usecases/search_customers_usecase.dart';
 import '../../domain/entities/created_order_entity.dart';
 import '../../domain/entities/sales_order_header_entity.dart';
@@ -15,6 +16,9 @@ import '../../domain/usecases/get_sales_order_usecase.dart';
 part 'create_order_state.dart';
 
 /// Drives the create-sales-order screen: company, warehouse, customer, submit.
+///
+/// The currency is deliberately not sent: the backend resolves it from the
+/// session and the customer, which keeps D365 as the single source of truth.
 class CreateOrderCubit extends Cubit<CreateOrderState> {
   CreateOrderCubit({
     required CreateSalesOrderUseCase createSalesOrderUseCase,
@@ -36,8 +40,8 @@ class CreateOrderCubit extends Cubit<CreateOrderState> {
     emit(
       CreateOrderState(
         company: company,
+        companyDisplayName: session.resolvedDisplayCompanyName,
         warehouse: session.resolvedWarehouse,
-        currency: session.currency,
         customer: account.isEmpty
             ? null
             : CustomerEntity(
@@ -73,7 +77,6 @@ class CreateOrderCubit extends Cubit<CreateOrderState> {
           company: state.company,
           custAccount: customer.customerAccount,
           inventLocationId: state.warehouse,
-          currencyCode: state.currency,
         );
     if (isClosed) {
       return;
@@ -124,7 +127,7 @@ class CreateOrderCubit extends Cubit<CreateOrderState> {
     required String company,
     required String account,
   }) async {
-    final Either<Failure, List<CustomerEntity>> result =
+    final Either<Failure, CustomerPageResult> result =
         await _searchCustomersUseCase(
           company: company,
           search: account,
@@ -134,7 +137,14 @@ class CreateOrderCubit extends Cubit<CreateOrderState> {
       return;
     }
     final List<CustomerEntity> matches = result
-        .getOrElse((_) => const <CustomerEntity>[])
+        .getOrElse((_) => const CustomerPageResult(
+          items: <CustomerEntity>[],
+          top: 10,
+          skip: 0,
+          count: 0,
+          hasMore: false,
+        ))
+        .items
         .where((CustomerEntity c) => c.customerAccount == account)
         .toList();
     emit(

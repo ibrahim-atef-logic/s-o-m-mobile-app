@@ -33,7 +33,7 @@ class SubmitQuickBatchUseCase {
     if (lines.length > kMaxLines) {
       return Future<Either<Failure, LineSubmitResultEntity>>.value(
         const Left<Failure, LineSubmitResultEntity>(
-          ValidationFailure('Quick add allows max 10 lines'),
+          ValidationFailure('MAX_LINES: Quick add allows max 10 lines'),
         ),
       );
     }

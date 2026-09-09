@@ -10,6 +10,8 @@ import 'package:logic_retail_mobile/features/catalog/domain/repositories/catalog
 import 'package:logic_retail_mobile/features/catalog/domain/usecases/get_failed_lines_usecase.dart';
 import 'package:logic_retail_mobile/features/catalog/domain/usecases/get_on_hand_usecase.dart';
 import 'package:logic_retail_mobile/features/catalog/domain/usecases/lookup_barcode_usecase.dart';
+import 'package:logic_retail_mobile/features/catalog/domain/usecases/lookup_item_usecase.dart';
+import 'package:logic_retail_mobile/features/sales_orders/domain/usecases/delete_sales_order_line_usecase.dart';
 import 'package:logic_retail_mobile/features/catalog/domain/usecases/resolve_price_usecase.dart';
 import 'package:logic_retail_mobile/features/catalog/domain/usecases/submit_full_line_usecase.dart';
 import 'package:logic_retail_mobile/features/catalog/domain/usecases/submit_quick_batch_usecase.dart';
@@ -74,7 +76,12 @@ void main() {
   group('GET /api/v1/sales-orders/:id/lines', () {
     test('returns lines', () async {
       when(
-        () => salesOrders.getOrderLines(salesId: salesId, company: company),
+        () => salesOrders.getOrderLines(
+          salesId: salesId,
+          company: company,
+          top: any(named: 'top'),
+          skip: any(named: 'skip'),
+        ),
       ).thenAnswer(
         (_) async => const Right<Failure, List<SalesOrderLineEntity>>(
           <SalesOrderLineEntity>[
@@ -114,9 +121,7 @@ void main() {
       );
       when(
         () => catalog.lookupBarcode(code: 'BC-100', company: company),
-      ).thenAnswer(
-        (_) async => const Right<Failure, BarcodeItemEntity>(item),
-      );
+      ).thenAnswer((_) async => const Right<Failure, BarcodeItemEntity>(item));
 
       final Either<Failure, BarcodeItemEntity> result =
           await LookupBarcodeUseCase(catalog)(code: 'BC-100', company: company);
@@ -131,33 +136,77 @@ void main() {
     });
   });
 
-  group('GET /api/v1/pricing', () {
+  group('GET /api/v1/items/:itemNumber', () {
+    test('lookup item success', () async {
+      const BarcodeItemEntity item = BarcodeItemEntity(
+        barcode: '6287007961754',
+        itemNumber: 'BG410.003',
+        productName: 'Drill',
+        productDescription: '',
+        unitId: 'ea',
+        dataArea: company,
+      );
+      when(
+        () => catalog.lookupItem(
+          itemNumber: 'BG410.003',
+          company: company,
+        ),
+      ).thenAnswer((_) async => const Right<Failure, BarcodeItemEntity>(item));
+
+      final Either<Failure, BarcodeItemEntity> result =
+          await LookupItemUseCase(catalog)(
+            itemNumber: 'BG410.003',
+            company: company,
+          );
+
+      expect(result, const Right<Failure, BarcodeItemEntity>(item));
+    });
+  });
+
+  group('DELETE /api/v1/sales-orders/:id/lines/:recordId', () {
+    test('delegates delete', () async {
+      when(
+        () => salesOrders.deleteOrderLine(
+          salesId: salesId,
+          company: company,
+          recordId: 123,
+        ),
+      ).thenAnswer((_) async => const Right<Failure, void>(null));
+
+      final Either<Failure, void> result = await DeleteSalesOrderLineUseCase(
+        salesOrders,
+      )(salesId: salesId, company: company, recordId: 123);
+
+      expect(result.isRight(), isTrue);
+    });
+  });
+
+  group('POST /api/v1/item-price', () {
     test('resolve price success', () async {
       const PriceInfoEntity price = PriceInfoEntity(
         itemNumber: 'ITEM-200',
         price: 25.5,
         unitId: 'ea',
-        customerAccountNumber: 'TR-001',
-        priceCustomerGroupCode: 'Retail',
-        dataArea: company,
+        currency: 'SAR',
       );
       when(
         () => catalog.resolvePrice(
           itemNumber: any(named: 'itemNumber'),
           company: any(named: 'company'),
-          custAccount: any(named: 'custAccount'),
-          priceGroup: any(named: 'priceGroup'),
+          salesUnitId: any(named: 'salesUnitId'),
+          warehouseId: any(named: 'warehouseId'),
+          channelRecId: any(named: 'channelRecId'),
         ),
       ).thenAnswer((_) async => const Right<Failure, PriceInfoEntity>(price));
 
-      final Either<Failure, PriceInfoEntity> result = await ResolvePriceUseCase(
-        catalog,
-      )(
-        itemNumber: 'ITEM-200',
-        company: company,
-        custAccount: 'TR-001',
-        priceGroup: 'Retail',
-      );
+      final Either<Failure, PriceInfoEntity> result =
+          await ResolvePriceUseCase(catalog)(
+            itemNumber: 'ITEM-200',
+            company: company,
+            salesUnitId: 'ea',
+            warehouseId: '11',
+            channelRecId: 1,
+          );
 
       expect(result, const Right<Failure, PriceInfoEntity>(price));
     });
@@ -223,7 +272,7 @@ void main() {
       expect(
         result,
         const Left<Failure, LineSubmitResultEntity>(
-          ValidationFailure('Quick add allows max 10 lines'),
+          ValidationFailure('MAX_LINES: Quick add allows max 10 lines'),
         ),
       );
     });

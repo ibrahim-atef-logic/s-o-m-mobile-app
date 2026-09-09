@@ -11,6 +11,7 @@ import 'package:logic_retail_mobile/features/auth/domain/entities/company_entity
 import 'package:logic_retail_mobile/features/auth/domain/entities/user_session_entity.dart';
 import 'package:logic_retail_mobile/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:logic_retail_mobile/features/customers/domain/entities/customer_entity.dart';
+import 'package:logic_retail_mobile/features/customers/domain/entities/customer_page_result.dart';
 import 'package:logic_retail_mobile/features/customers/domain/usecases/search_customers_usecase.dart';
 import 'package:logic_retail_mobile/features/sales_orders/domain/entities/created_order_entity.dart';
 import 'package:logic_retail_mobile/features/sales_orders/domain/entities/sales_order_header_entity.dart';
@@ -88,11 +89,18 @@ void main() {
         company: any(named: 'company'),
         search: any(named: 'search'),
         top: any(named: 'top'),
+        skip: any(named: 'skip'),
       ),
     ).thenAnswer(
-      (_) async => const Right<Failure, List<CustomerEntity>>(<CustomerEntity>[
-        defaultCustomer,
-      ]),
+      (_) async => Right<Failure, CustomerPageResult>(
+        CustomerPageResult(
+          items: const <CustomerEntity>[defaultCustomer],
+          top: 30,
+          skip: 0,
+          count: 1,
+          hasMore: false,
+        ),
+      ),
     );
 
     sl.registerFactory(
@@ -167,6 +175,7 @@ void main() {
     expect(find.text(Fixtures.warehouse), findsOneWidget);
     expect(find.text('عميل نقدي ميرا مارت جدة 01'), findsOneWidget);
     expect(find.text(Fixtures.defaultCustAccount), findsOneWidget);
+    expect(find.text('SAR'), findsNothing);
   });
 
   testWidgets('creating the order pops the new header back to the list', (
@@ -202,7 +211,6 @@ void main() {
         company: 'mm',
         custAccount: Fixtures.defaultCustAccount,
         inventLocationId: Fixtures.warehouse,
-        currencyCode: 'SAR',
       ),
     ).called(1);
     expect(find.text('open-create'), findsOneWidget);

@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/utils/json_map.dart';
 import '../models/auth_response_model.dart';
+import 'auth_login_diagnostics.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AuthResponseModel> login({
@@ -44,7 +45,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         },
       );
       final Map<String, dynamic> body = response.data as Map<String, dynamic>;
-      return AuthResponseModel.fromJson(body['data'] as Map<String, dynamic>);
+      final AuthResponseModel parsed = AuthResponseModel.fromJson(
+        body['data'] as Map<String, dynamic>,
+      );
+      AuthLoginDiagnostics.logMissingChannelName(parsed.user);
+      return parsed;
     } on DioException catch (e) {
       throw _mapDio(e);
     }
@@ -81,12 +86,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final Map<String, dynamic> data = body['data'] as Map<String, dynamic>;
       final String newRefresh =
           JsonMap.stringOrNull(data, 'refreshToken') ?? refreshToken;
-      return AuthResponseModel.fromJson(
-        <String, dynamic>{
-          ...data,
-          'refreshToken': newRefresh,
-        },
-      );
+      return AuthResponseModel.fromJson(<String, dynamic>{
+        ...data,
+        'refreshToken': newRefresh,
+      });
     } on DioException catch (e) {
       throw _mapDio(e);
     }

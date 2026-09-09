@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/theme/app_gradients.dart';
+import '../../../../core/widgets/add_flow_step_header.dart';
+import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/app_gradient_app_bar.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/app_validation_text.dart';
 import '../../../../core/widgets/barcode_scanner_panel.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
+import '../../../../core/widgets/section_label.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/quick_add_bloc.dart';
 
@@ -42,7 +47,7 @@ class _QuickAddScanPageState extends State<QuickAddScanPage> {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.addItem)),
+      appBar: AppGradientAppBar(title: Text(l10n.addItem)),
       body: BlocConsumer<QuickAddBloc, QuickAddState>(
         listenWhen: (QuickAddState p, QuickAddState c) =>
             c.lineAdded ||
@@ -74,62 +79,87 @@ class _QuickAddScanPageState extends State<QuickAddScanPage> {
           }
         },
         builder: (BuildContext context, QuickAddState state) {
-          return ListView(
-            padding: const EdgeInsets.all(AppDimensions.spaceMd),
-            children: <Widget>[
-              BarcodeScannerPanel(
-                lastScanned: _lastScanned,
-                onCaptured: (String code) {
-                  setState(() => _lastScanned = code);
-                  context.read<QuickAddBloc>().add(
-                    QuickAddBarcodeChanged(code),
-                  );
-                },
-              ),
-              const SizedBox(height: AppDimensions.spaceMd),
-              TextField(
-                controller: _barcodeCtrl,
-                decoration: InputDecoration(labelText: l10n.barcode),
-                onChanged: (String v) =>
-                    context.read<QuickAddBloc>().add(QuickAddBarcodeChanged(v)),
-              ),
-              const SizedBox(height: AppDimensions.spaceMd),
-              Text(l10n.quantity),
-              const SizedBox(height: AppDimensions.spaceSm),
-              QuantityStepper(
-                controller: _qtyCtrl,
-                onChanged: (String v) => context.read<QuickAddBloc>().add(
-                  QuickAddQuantityChanged(v),
+          final int step = state.barcode.trim().isEmpty
+              ? 0
+              : (state.quantityText.trim().isEmpty ? 1 : 2);
+          return DecoratedBox(
+            decoration: const BoxDecoration(gradient: AppGradients.pageWash),
+            child: ListView(
+              padding: const EdgeInsets.all(AppDimensions.spaceMd),
+              children: <Widget>[
+                AddFlowStepHeader(
+                  labels: <String>[
+                    l10n.stepScan,
+                    l10n.stepQuantity,
+                    l10n.stepAdd,
+                  ],
+                  activeIndex: step,
                 ),
-              ),
-              if (state.validation != QuickAddValidation.none)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppDimensions.spaceSm),
-                  child: Text(
-                    _validationMessage(l10n, state.validation),
-                    style: const TextStyle(color: AppColors.danger),
+                const SizedBox(height: AppDimensions.spaceMd),
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      BarcodeScannerPanel(
+                        lastScanned: _lastScanned,
+                        onCaptured: (String code) {
+                          setState(() => _lastScanned = code);
+                          context.read<QuickAddBloc>().add(
+                            QuickAddBarcodeChanged(code),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: AppDimensions.spaceMd),
+                      TextField(
+                        controller: _barcodeCtrl,
+                        decoration: InputDecoration(labelText: l10n.barcode),
+                        onChanged: (String v) => context
+                            .read<QuickAddBloc>()
+                            .add(QuickAddBarcodeChanged(v)),
+                      ),
+                    ],
                   ),
                 ),
-              const SizedBox(height: AppDimensions.spaceLg),
-              PrimaryButton(
-                label: l10n.addToCart,
-                onPressed: () =>
-                    context.read<QuickAddBloc>().add(const QuickAddLineAdded()),
-              ),
-            ],
+                AppCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      SectionLabel(l10n.quantity),
+                      QuantityStepper(
+                        controller: _qtyCtrl,
+                        onChanged: (String v) => context
+                            .read<QuickAddBloc>()
+                            .add(QuickAddQuantityChanged(v)),
+                      ),
+                      AppValidationText(
+                        _validationMessage(l10n, state.validation),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppDimensions.spaceSm),
+                PrimaryButton(
+                  label: l10n.addToCart,
+                  icon: Icons.add_shopping_cart_outlined,
+                  onPressed: () => context.read<QuickAddBloc>().add(
+                    const QuickAddLineAdded(),
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  String _validationMessage(AppLocalizations l10n, QuickAddValidation v) {
+  String? _validationMessage(AppLocalizations l10n, QuickAddValidation v) {
     return switch (v) {
       QuickAddValidation.barcodeRequired => l10n.errorBarcodeRequired,
       QuickAddValidation.qtyInvalid => l10n.errorQtyInvalid,
       QuickAddValidation.maxLines => l10n.errorMaxQuickLines,
       QuickAddValidation.emptyCart => l10n.cartEmpty,
-      QuickAddValidation.none => '',
+      QuickAddValidation.none => null,
     };
   }
 }

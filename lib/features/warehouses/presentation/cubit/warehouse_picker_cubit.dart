@@ -43,6 +43,7 @@ class WarehousePickerCubit extends Cubit<WarehousePickerState> {
         await _selectWarehouseUseCase(
           inventLocationId: warehouse.inventLocationId,
           dataAreaId: warehouse.dataAreaId,
+          warehouseDisplayName: warehouse.displayName,
         );
     result.fold(
       (Failure f) => emit(current.copyWith(saveFailure: f)),

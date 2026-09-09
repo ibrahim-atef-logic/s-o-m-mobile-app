@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'app_dimensions.dart';
 import 'app_text_styles.dart';
 import 'component_themes/buttons_theme.dart';
 import 'component_themes/inputs_theme.dart';
@@ -26,14 +27,19 @@ ThemeData buildAppTheme() {
     scaffoldBackgroundColor: AppColors.background,
     textTheme: const TextTheme(
       displayLarge: AppTextStyles.displayLg,
+      displayMedium: AppTextStyles.displaySm,
       displaySmall: AppTextStyles.displaySm,
+      headlineLarge: AppTextStyles.headline,
+      headlineMedium: AppTextStyles.headline,
       headlineSmall: AppTextStyles.headline,
       titleLarge: AppTextStyles.titleLg,
       titleMedium: AppTextStyles.titleMd,
+      titleSmall: AppTextStyles.label,
       bodyLarge: AppTextStyles.bodyLg,
       bodyMedium: AppTextStyles.body,
       bodySmall: AppTextStyles.bodySm,
       labelLarge: AppTextStyles.label,
+      labelMedium: AppTextStyles.label,
       labelSmall: AppTextStyles.caption,
     ),
     appBarTheme: SurfacesTheme.appBar(),
@@ -51,5 +57,17 @@ ThemeData buildAppTheme() {
     outlinedButtonTheme: ButtonsTheme.outlined(),
     textButtonTheme: ButtonsTheme.text(),
     iconButtonTheme: ButtonsTheme.icon(),
+    iconTheme: const IconThemeData(
+      color: AppColors.textSecondary,
+      size: AppDimensions.iconMd,
+    ),
+    tooltipTheme: TooltipThemeData(
+      waitDuration: AppDimensions.durationBase,
+      decoration: BoxDecoration(
+        color: AppColors.neutral800,
+        borderRadius: BorderRadius.circular(AppDimensions.radiusSm),
+      ),
+      textStyle: AppTextStyles.caption.copyWith(color: AppColors.textInverse),
+    ),
   );
 }

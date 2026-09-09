@@ -3,8 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/theme/app_gradients.dart';
+import '../../../../core/theme/app_shadows.dart';
+import '../../../../core/widgets/app_gradient_app_bar.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/primary_button.dart';
 import '../../../../core/widgets/states/app_error_view.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../auth/domain/entities/user_session_entity.dart';
@@ -27,7 +32,7 @@ class CreateOrderPage extends StatelessWidget {
     final UserSessionEntity? session = _sessionOf(context);
     if (session == null || session.orderDataArea.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(l10n.newSalesOrder)),
+        appBar: AppGradientAppBar(title: Text(l10n.newSalesOrder)),
         body: AppErrorView(
           title: l10n.errorValidation,
           message: l10n.errorCompanyRequired,
@@ -46,35 +51,69 @@ UserSessionEntity? _sessionOf(BuildContext context) {
   return auth is AuthAuthenticated ? auth.session : null;
 }
 
-class _CreateOrderView extends StatelessWidget {
+class _CreateOrderView extends StatefulWidget {
   const _CreateOrderView();
+
+  @override
+  State<_CreateOrderView> createState() => _CreateOrderViewState();
+}
+
+class _CreateOrderViewState extends State<_CreateOrderView> {
+  bool _askedForWarehouse = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _askedForWarehouse) {
+        return;
+      }
+      final CreateOrderState state = context.read<CreateOrderCubit>().state;
+      final String? warehouse = state.warehouse?.trim();
+      if (warehouse == null || warehouse.isEmpty) {
+        _askedForWarehouse = true;
+        _pickWarehouse();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.newSalesOrder)),
+      appBar: AppGradientAppBar(title: Text(l10n.newSalesOrder)),
       body: BlocConsumer<CreateOrderCubit, CreateOrderState>(
+        listenWhen: (CreateOrderState previous, CreateOrderState current) {
+          return previous.failure != current.failure ||
+              previous.warehouseRequired != current.warehouseRequired ||
+              previous.createdOrder != current.createdOrder;
+        },
         listener: _onStateChanged,
         builder: (BuildContext context, CreateOrderState state) {
-          return Column(
-            children: <Widget>[
-              if (state.submitting) const LinearProgressIndicator(),
-              Expanded(
-                child: CreateOrderForm(
-                  company: state.company,
-                  warehouse: state.warehouse,
-                  currency: state.currency,
-                  customer: state.customer,
-                  resolvingCustomer: state.resolvingCustomer,
-                  customerError: state.customerError == null
-                      ? null
-                      : l10n.errorCustomerRequired,
-                  onPickCustomer: () => _pickCustomer(context, state),
+          final String? warehouse = state.warehouse?.trim();
+          return DecoratedBox(
+            decoration: const BoxDecoration(gradient: AppGradients.pageWash),
+            child: Column(
+              children: <Widget>[
+                if (state.submitting) const LinearProgressIndicator(),
+                Expanded(
+                  child: CreateOrderForm(
+                    company: state.companyLabel,
+                    warehouse: state.warehouse,
+                    customer: state.customer,
+                    resolvingCustomer: state.resolvingCustomer,
+                    customerError: state.customerError == null
+                        ? null
+                        : l10n.errorCustomerRequired,
+                    onPickCustomer: () => _pickCustomer(state),
+                    onPickWarehouse: warehouse == null || warehouse.isEmpty
+                        ? _pickWarehouse
+                        : null,
+                  ),
                 ),
-              ),
-              _submitBar(context, state, l10n),
-            ],
+                _submitBar(context, state, l10n),
+              ],
+            ),
           );
         },
       ),
@@ -86,27 +125,31 @@ class _CreateOrderView extends StatelessWidget {
     CreateOrderState state,
     AppLocalizations l10n,
   ) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(AppDimensions.spaceMd),
-        child: SizedBox(
-          height: AppDimensions.primaryButtonHeight,
-          child: FilledButton.icon(
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AppDimensions.radius2Xl),
+        ),
+        boxShadow: AppShadows.stickyBarShadow,
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(AppDimensions.spaceMd),
+          child: PrimaryButton(
+            label: l10n.createOrder,
+            icon: Icons.add_shopping_cart_outlined,
+            isLoading: state.submitting,
             onPressed: state.canSubmit
                 ? () => context.read<CreateOrderCubit>().submit()
                 : null,
-            icon: const Icon(Icons.add_shopping_cart_outlined),
-            label: Text(l10n.createOrder),
           ),
         ),
       ),
     );
   }
 
-  Future<void> _pickCustomer(
-    BuildContext context,
-    CreateOrderState state,
-  ) async {
+  Future<void> _pickCustomer(CreateOrderState state) async {
     final CreateOrderCubit cubit = context.read<CreateOrderCubit>();
     final CustomerEntity? picked = await context.push<CustomerEntity>(
       '/orders/new/customer?company=${Uri.encodeComponent(state.company)}'
@@ -124,7 +167,7 @@ class _CreateOrderView extends StatelessWidget {
       return;
     }
     if (state.warehouseRequired) {
-      _pickWarehouse(context);
+      _pickWarehouse();
       return;
     }
     final SalesOrderHeaderEntity? created = state.createdOrder;
@@ -139,10 +182,16 @@ class _CreateOrderView extends StatelessWidget {
     context.pop<SalesOrderHeaderEntity>(created);
   }
 
-  Future<void> _pickWarehouse(BuildContext context) async {
+  Future<void> _pickWarehouse() async {
+    if (!mounted) {
+      return;
+    }
     final CreateOrderCubit cubit = context.read<CreateOrderCubit>();
     final AuthBloc authBloc = context.read<AuthBloc>();
-    await context.push('/warehouse?change=1');
+    await context.push('/warehouse');
+    if (!mounted) {
+      return;
+    }
     final AuthState auth = authBloc.state;
     if (auth is AuthAuthenticated) {
       await cubit.start(auth.session);

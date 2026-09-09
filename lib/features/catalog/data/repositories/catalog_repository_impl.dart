@@ -37,21 +37,42 @@ class CatalogRepositoryImpl implements CatalogRepository {
   }
 
   @override
+  Future<Either<Failure, BarcodeItemEntity>> lookupItem({
+    required String itemNumber,
+    required String company,
+  }) async {
+    try {
+      final BarcodeItemModel model = await _remote.lookupItem(
+        itemNumber: itemNumber,
+        company: company,
+      );
+      return Right<Failure, BarcodeItemEntity>(model.toEntity());
+    } catch (e) {
+      return Left<Failure, BarcodeItemEntity>(_toFailure(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, PriceInfoEntity>> resolvePrice({
     required String itemNumber,
     required String company,
-    required String custAccount,
-    required String priceGroup,
-    String? unitId,
+    required String salesUnitId,
+    String? warehouseId,
+    int? channelRecId,
   }) async {
     try {
       final PriceInfoModel model = await _remote.resolvePrice(
         itemNumber: itemNumber,
         company: company,
-        custAccount: custAccount,
-        priceGroup: priceGroup,
-        unitId: unitId,
+        salesUnitId: salesUnitId,
+        warehouseId: warehouseId,
+        channelRecId: channelRecId,
       );
+      if (!model.found) {
+        return const Left<Failure, PriceInfoEntity>(
+          ServerFailure('NO_PRICE: Price not found'),
+        );
+      }
       return Right<Failure, PriceInfoEntity>(model.toEntity());
     } catch (e) {
       return Left<Failure, PriceInfoEntity>(_toFailure(e));

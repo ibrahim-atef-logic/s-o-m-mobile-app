@@ -13,6 +13,7 @@ import 'package:logic_retail_mobile/features/auth/domain/usecases/login_usecase.
 import 'package:logic_retail_mobile/features/customers/data/datasources/customer_remote_data_source.dart';
 import 'package:logic_retail_mobile/features/customers/data/repositories/customer_repository_impl.dart';
 import 'package:logic_retail_mobile/features/customers/domain/entities/customer_entity.dart';
+import 'package:logic_retail_mobile/features/customers/domain/entities/customer_page_result.dart';
 import 'package:logic_retail_mobile/features/customers/domain/usecases/search_customers_usecase.dart';
 import 'package:logic_retail_mobile/features/sales_orders/data/datasources/sales_orders_remote_data_source.dart';
 import 'package:logic_retail_mobile/features/sales_orders/data/repositories/sales_orders_repository_impl.dart';
@@ -63,13 +64,21 @@ void main() {
     final UserSessionEntity session = await login(Fixtures.personnelNumber);
     expect(session.orderDataArea, 'mm');
 
-    final Either<Failure, List<CustomerEntity>> found = await searchCustomers(
+    final Either<Failure, CustomerPageResult> found = await searchCustomers(
       company: session.orderDataArea,
       search: 'MMS',
     );
-    final List<CustomerEntity> customers = found.getOrElse(
-      (_) => <CustomerEntity>[],
-    );
+    final List<CustomerEntity> customers = found
+        .getOrElse(
+          (_) => const CustomerPageResult(
+            items: <CustomerEntity>[],
+            top: 30,
+            skip: 0,
+            count: 0,
+            hasMore: false,
+          ),
+        )
+        .items;
     expect(customers, hasLength(1));
     expect(customers.first.customerAccount, 'MMS021');
 
@@ -77,7 +86,6 @@ void main() {
       company: session.orderDataArea,
       custAccount: customers.first.customerAccount,
       inventLocationId: session.resolvedWarehouse,
-      currencyCode: session.currency,
     );
 
     final CreatedOrderEntity created = result.getOrElse(
@@ -118,7 +126,7 @@ void main() {
   test('the login registry key is rejected for customers and create', () async {
     await login(Fixtures.personnelNumber);
 
-    final Either<Failure, List<CustomerEntity>> customers =
+    final Either<Failure, CustomerPageResult> customers =
         await searchCustomers(company: Fixtures.loginCompany);
     final Either<Failure, CreatedOrderEntity> created = await createOrder(
       company: Fixtures.loginCompany,

@@ -12,10 +12,11 @@ class ResolvePriceUseCase {
   Future<Either<Failure, PriceInfoEntity>> call({
     required String itemNumber,
     required String company,
-    required String custAccount,
-    required String priceGroup,
-    String? unitId,
+    required String salesUnitId,
+    String? warehouseId,
+    int? channelRecId,
   }) {
+    // Empty salesUnitId is allowed — some DataAreas resolve price without a unit.
     if (itemNumber.trim().isEmpty || company.trim().isEmpty) {
       return Future<Either<Failure, PriceInfoEntity>>.value(
         const Left<Failure, PriceInfoEntity>(
@@ -23,12 +24,13 @@ class ResolvePriceUseCase {
         ),
       );
     }
+    final String warehouse = warehouseId?.trim() ?? '';
     return _repository.resolvePrice(
       itemNumber: itemNumber.trim(),
       company: company.trim(),
-      custAccount: custAccount.trim(),
-      priceGroup: priceGroup.trim(),
-      unitId: unitId?.trim(),
+      salesUnitId: salesUnitId.trim(),
+      warehouseId: warehouse.isEmpty ? null : warehouse,
+      channelRecId: channelRecId,
     );
   }
 }
