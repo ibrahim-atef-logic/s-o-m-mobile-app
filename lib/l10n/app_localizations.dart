@@ -1046,6 +1046,12 @@ abstract class AppLocalizations {
   /// **'Item not found'**
   String get errorItemNotFound;
 
+  /// No description provided for @errorBarcodeNotFoundTryItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode not found — try Item mode (صنف) if you typed an item number'**
+  String get errorBarcodeNotFoundTryItem;
+
   /// No description provided for @errorForbiddenCompany.
   ///
   /// In en, this message translates to:

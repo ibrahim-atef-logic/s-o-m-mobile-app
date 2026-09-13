@@ -551,6 +551,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get errorItemNotFound => 'الصنف غير موجود';
 
   @override
+  String get errorBarcodeNotFoundTryItem =>
+      'الباركود غير موجود — جرّب وضع الصنف إذا أدخلت رقم صنف';
+
+  @override
   String get errorForbiddenCompany => 'هذه الشركة غير مسموحة للجلسة الحالية';
 
   @override

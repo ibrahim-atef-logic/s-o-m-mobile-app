@@ -109,7 +109,7 @@ void main() {
       'ORDER_NOT_EDITABLE: Order confirmed / الأمر مؤكد',
     );
 
-    expect(barcode.localizedMessage(l10n), l10n.errorItemNotFound);
+    expect(barcode.localizedMessage(l10n), l10n.errorBarcodeNotFoundTryItem);
     expect(item.localizedMessage(l10n), l10n.errorItemNotFound);
     expect(item.snackBarMessage(l10n), l10n.errorItemNotFound);
     expect(forbidden.localizedMessage(l10n), l10n.errorForbiddenCompany);

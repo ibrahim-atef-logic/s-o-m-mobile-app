@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/error/api_error_code.dart';
 import '../../../../core/error/failures.dart';
 import '../../../catalog/domain/entities/barcode_item_entity.dart';
 import '../../../catalog/domain/entities/line_submit_result_entity.dart';
@@ -43,15 +44,45 @@ class FullAddCatalogActions {
   final int? _sessionChannelRecId;
   final String? _sessionCurrency;
 
+  /// Barcode mode → GET /barcodes/{code}.
+  /// Item mode → GET /items/{itemNumber}.
+  ///
+  /// When barcode mode returns BARCODE_NOT_FOUND / ITEM_NOT_FOUND, try
+  /// GET /items/{code} once so users who typed an ItemId still succeed
+  /// (e.g. BG650.003). Does not use `by=itemNumber`. Spaces: strip `\r\n\t`
+  /// only; end-trim is server-side.
   Future<Either<Failure, BarcodeItemEntity>> lookup({
     required String barcode,
     required String company,
     bool byItem = false,
-  }) {
+  }) async {
     if (byItem) {
       return _lookupItemUseCase(itemNumber: barcode, company: company);
     }
-    return _lookupBarcodeUseCase(code: barcode, company: company);
+    final Either<Failure, BarcodeItemEntity> barcodeResult =
+        await _lookupBarcodeUseCase(code: barcode, company: company);
+    return barcodeResult.fold(
+      (Failure barcodeFailure) async {
+        if (!barcodeFailure.isItemNotFound) {
+          return Left<Failure, BarcodeItemEntity>(barcodeFailure);
+        }
+        final Either<Failure, BarcodeItemEntity> itemResult =
+            await _lookupItemUseCase(itemNumber: barcode, company: company);
+        return itemResult.fold(
+          (Failure itemFailure) {
+            // Keep barcode error when item is also missing (UX hint stays).
+            if (itemFailure.isItemNotFound) {
+              return Left<Failure, BarcodeItemEntity>(barcodeFailure);
+            }
+            return Left<Failure, BarcodeItemEntity>(itemFailure);
+          },
+          (BarcodeItemEntity item) =>
+              Right<Failure, BarcodeItemEntity>(item),
+        );
+      },
+      (BarcodeItemEntity item) async =>
+          Right<Failure, BarcodeItemEntity>(item),
+    );
   }
 
   /// Prefer inventory unit, else barcode/item unitId.

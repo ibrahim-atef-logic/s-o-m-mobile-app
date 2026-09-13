@@ -97,8 +97,6 @@ class FullAddBloc extends Bloc<FullAddEvent, FullAddState> {
     emit(
       state.copyWith(
         quantityText: event.quantity,
-        clearPrice: true,
-        fetchingPrice: false,
         validation: FullAddValidation.none,
         clearError: true,
       ),
@@ -106,7 +104,15 @@ class FullAddBloc extends Bloc<FullAddEvent, FullAddState> {
   }
 
   void _onModeChanged(FullAddModeChanged event, Emitter<FullAddState> emit) {
-    emit(state.copyWith(autoMode: event.autoMode, clearError: true));
+    final bool toManual = !event.autoMode;
+    final String qty = ScanCode.stripControls(state.quantityText);
+    emit(
+      state.copyWith(
+        autoMode: event.autoMode,
+        quantityText: toManual && qty.trim().isEmpty ? '1' : state.quantityText,
+        clearError: true,
+      ),
+    );
   }
 
   void _onScanReset(FullAddScanReset event, Emitter<FullAddState> emit) {

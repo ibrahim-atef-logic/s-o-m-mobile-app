@@ -15,6 +15,7 @@ class QuantityStepper extends StatelessWidget {
     this.min = 1,
     this.max,
     this.enabled = true,
+    this.showButtons = true,
     super.key,
   });
 
@@ -24,6 +25,9 @@ class QuantityStepper extends StatelessWidget {
   final int min;
   final int? max;
   final bool enabled;
+
+  /// When false (auto add mode), only the numeric field is shown.
+  final bool showButtons;
 
   int get _current {
     return int.tryParse(controller.text.trim()) ?? min;
@@ -42,6 +46,28 @@ class QuantityStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context);
+    final Widget field = TextField(
+      controller: controller,
+      enabled: enabled,
+      textAlign: TextAlign.center,
+      keyboardType: TextInputType.number,
+      inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.digitsOnly,
+      ],
+      style: context.numericStyle,
+      decoration: const InputDecoration(
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(
+          vertical: AppDimensions.space12,
+        ),
+      ),
+      onChanged: onChanged,
+      onSubmitted: (_) => onCommitted?.call(controller.text),
+      textInputAction: TextInputAction.done,
+    );
+    if (!showButtons) {
+      return field;
+    }
     return Row(
       children: <Widget>[
         _StepButton(
@@ -49,27 +75,7 @@ class QuantityStepper extends StatelessWidget {
           semanticsLabel: l10n.decreaseQuantity,
           onPressed: enabled ? () => _step(-1) : null,
         ),
-        Expanded(
-          child: TextField(
-            controller: controller,
-            enabled: enabled,
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly,
-            ],
-            style: context.numericStyle,
-            decoration: const InputDecoration(
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(
-                vertical: AppDimensions.space12,
-              ),
-            ),
-            onChanged: onChanged,
-            onSubmitted: (_) => onCommitted?.call(controller.text),
-            textInputAction: TextInputAction.done,
-          ),
-        ),
+        Expanded(child: field),
         _StepButton(
           icon: Icons.add,
           semanticsLabel: l10n.increaseQuantity,

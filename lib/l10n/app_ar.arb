@@ -198,6 +198,7 @@
   "errorCustomerStopped": "هذا العميل موقوف في Dynamics ولا يمكن إنشاء أمر له",
   "errorLineAlreadyExists": "هذا الصنف مضاف على أمر البيع بالفعل",
   "errorItemNotFound": "الصنف غير موجود",
+  "errorBarcodeNotFoundTryItem": "الباركود غير موجود — جرّب وضع الصنف إذا أدخلت رقم صنف",
   "errorForbiddenCompany": "هذه الشركة غير مسموحة للجلسة الحالية",
   "errorSoNotOpen": "أمر البيع هذا غير مفتوح للتعديل",
   "errorValidation": "يرجى التحقق من المدخلات",

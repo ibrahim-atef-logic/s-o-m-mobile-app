@@ -198,6 +198,7 @@
   "errorCustomerStopped": "This customer is stopped in Dynamics and cannot be used for orders",
   "errorLineAlreadyExists": "This item is already on the sales order",
   "errorItemNotFound": "Item not found",
+  "errorBarcodeNotFoundTryItem": "Barcode not found — try Item mode (صنف) if you typed an item number",
   "errorForbiddenCompany": "This company is not allowed for the current session",
   "errorSoNotOpen": "This sales order is not open for editing",
   "errorValidation": "Please check your input",

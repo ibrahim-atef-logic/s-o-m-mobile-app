@@ -144,7 +144,7 @@ void main() {
   });
 
   blocTest<FullAddBloc, FullAddState>(
-    'lookup success then inventory without price',
+    'lookup success then inventory then price when stock available',
     build: () {
       stubHappyPath();
       return buildBloc();
@@ -153,24 +153,12 @@ void main() {
       bloc.add(const FullAddBarcodeChanged('6281001000002'));
       bloc.add(const FullAddLookupRequested());
     },
-    expect: () => <Matcher>[
-      isA<FullAddState>(),
-      isA<FullAddState>().having(
-        (FullAddState s) => s.lookingUp,
-        'lookingUp',
-        true,
-      ),
-      isA<FullAddState>()
-          .having((FullAddState s) => s.item, 'item', item)
-          .having((FullAddState s) => s.fetchingQty, 'fetchingQty', true)
-          .having((FullAddState s) => s.quantityText, 'qty empty', ''),
-      isA<FullAddState>()
-          .having((FullAddState s) => s.onHand, 'onHand', onHand)
-          .having((FullAddState s) => s.price, 'price', isNull)
-          .having((FullAddState s) => s.fetchingPrice, 'no price fetch', false),
-    ],
-    verify: (_) {
-      verifyNever(
+    verify: (FullAddBloc bloc) {
+      expect(bloc.state.item, item);
+      expect(bloc.state.onHand, onHand);
+      expect(bloc.state.price, price);
+      expect(bloc.state.quantityText, '');
+      verify(
         () => resolvePrice(
           itemNumber: any(named: 'itemNumber'),
           company: any(named: 'company'),
@@ -178,8 +166,47 @@ void main() {
           warehouseId: any(named: 'warehouseId'),
           channelRecId: any(named: 'channelRecId'),
         ),
-      );
+      ).called(1);
     },
+  );
+
+  blocTest<FullAddBloc, FullAddState>(
+    'manual lookup defaults quantity to 1',
+    build: () {
+      stubHappyPath();
+      return buildBloc();
+    },
+    act: (FullAddBloc bloc) async {
+      bloc.add(const FullAddModeChanged(autoMode: false));
+      bloc.add(const FullAddBarcodeChanged('6281001000002'));
+      bloc.add(const FullAddLookupRequested());
+    },
+    verify: (FullAddBloc bloc) {
+      expect(bloc.state.autoMode, isFalse);
+      expect(bloc.state.quantityText, '1');
+      expect(bloc.state.item, item);
+      expect(bloc.state.price, price);
+    },
+  );
+
+  blocTest<FullAddBloc, FullAddState>(
+    'switching to manual fills empty quantity with 1',
+    build: buildBloc,
+    seed: () => const FullAddState(
+      order: order,
+      barcode: '6281001000002',
+      item: item,
+      onHand: onHand,
+      quantityText: '',
+      autoMode: true,
+    ),
+    act: (FullAddBloc bloc) =>
+        bloc.add(const FullAddModeChanged(autoMode: false)),
+    expect: () => <Matcher>[
+      isA<FullAddState>()
+          .having((FullAddState s) => s.autoMode, 'manual', false)
+          .having((FullAddState s) => s.quantityText, 'qty', '1'),
+    ],
   );
 
   blocTest<FullAddBloc, FullAddState>(
@@ -230,7 +257,7 @@ void main() {
   );
 
   blocTest<FullAddBloc, FullAddState>(
-    'barcode lookup failure keeps BARCODE_NOT_FOUND',
+    'barcode lookup failure keeps BARCODE_NOT_FOUND after item fallback fails',
     build: () {
       when(
         () => lookup(
@@ -240,6 +267,16 @@ void main() {
       ).thenAnswer(
         (_) async => const Left<Failure, BarcodeItemEntity>(
           ServerFailure('BARCODE_NOT_FOUND: Barcode not found'),
+        ),
+      );
+      when(
+        () => lookupItem(
+          itemNumber: any(named: 'itemNumber'),
+          company: any(named: 'company'),
+        ),
+      ).thenAnswer(
+        (_) async => const Left<Failure, BarcodeItemEntity>(
+          ServerFailure('ITEM_NOT_FOUND: Item not found'),
         ),
       );
       return buildBloc();
@@ -263,6 +300,98 @@ void main() {
             'failure',
             contains('BARCODE_NOT_FOUND'),
           ),
+    ],
+    verify: (_) {
+      verify(
+        () => lookup(code: '0000000000000', company: 'usmf'),
+      ).called(1);
+      verify(
+        () => lookupItem(itemNumber: '0000000000000', company: 'usmf'),
+      ).called(1);
+    },
+  );
+
+  blocTest<FullAddBloc, FullAddState>(
+    'barcode NOT_FOUND falls back to item lookup for ItemId-like codes',
+    build: () {
+      when(
+        () => lookup(
+          code: any(named: 'code'),
+          company: any(named: 'company'),
+        ),
+      ).thenAnswer(
+        (_) async => const Left<Failure, BarcodeItemEntity>(
+          ServerFailure('BARCODE_NOT_FOUND: Barcode not found'),
+        ),
+      );
+      when(
+        () => lookupItem(
+          itemNumber: any(named: 'itemNumber'),
+          company: any(named: 'company'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, BarcodeItemEntity>(
+          BarcodeItemEntity(
+            barcode: '4823121501142',
+            itemNumber: 'BG650.003',
+            productName: 'احمر خدود',
+            productDescription: '',
+            unitId: 'حبة',
+            dataArea: 'usmf',
+          ),
+        ),
+      );
+      when(
+        () => getOnHand(
+          itemNumber: any(named: 'itemNumber'),
+          warehouse: any(named: 'warehouse'),
+          company: any(named: 'company'),
+        ),
+      ).thenAnswer(
+        (_) async => const Right<Failure, WarehouseOnHandEntity>(onHand),
+      );
+      when(
+        () => resolvePrice(
+          itemNumber: any(named: 'itemNumber'),
+          company: any(named: 'company'),
+          salesUnitId: any(named: 'salesUnitId'),
+          warehouseId: any(named: 'warehouseId'),
+          channelRecId: any(named: 'channelRecId'),
+        ),
+      ).thenAnswer((_) async => const Right<Failure, PriceInfoEntity>(price));
+      return buildBloc();
+    },
+    act: (FullAddBloc bloc) async {
+      bloc.add(const FullAddBarcodeChanged('BG650.003'));
+      bloc.add(const FullAddLookupRequested());
+    },
+    verify: (_) {
+      verify(() => lookup(code: 'BG650.003', company: 'usmf')).called(1);
+      verify(
+        () => lookupItem(itemNumber: 'BG650.003', company: 'usmf'),
+      ).called(1);
+    },
+    expect: () => <Matcher>[
+      isA<FullAddState>(),
+      isA<FullAddState>().having(
+        (FullAddState s) => s.lookingUp,
+        'lookingUp',
+        true,
+      ),
+      isA<FullAddState>()
+          .having(
+            (FullAddState s) => s.item?.itemNumber,
+            'itemNumber',
+            'BG650.003',
+          )
+          .having((FullAddState s) => s.fetchingQty, 'fetchingQty', true),
+      isA<FullAddState>().having(
+        (FullAddState s) => s.onHand,
+        'onHand',
+        onHand,
+      ),
+      isA<FullAddState>(),
+      isA<FullAddState>().having((FullAddState s) => s.price, 'price', price),
     ],
   );
 

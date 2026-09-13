@@ -558,6 +558,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorItemNotFound => 'Item not found';
 
   @override
+  String get errorBarcodeNotFoundTryItem =>
+      'Barcode not found — try Item mode (صنف) if you typed an item number';
+
+  @override
   String get errorForbiddenCompany =>
       'This company is not allowed for the current session';
 

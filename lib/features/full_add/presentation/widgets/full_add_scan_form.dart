@@ -109,6 +109,7 @@ class FullAddScanForm extends StatelessWidget {
             ),
           FullAddQuantityCard(
             controller: qtyCtrl,
+            showSteppers: !state.autoMode,
             max: state.onHand == null
                 ? null
                 : FullAddQtyRules.roundNearest(

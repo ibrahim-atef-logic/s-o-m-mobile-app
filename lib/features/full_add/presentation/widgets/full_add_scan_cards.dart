@@ -105,6 +105,7 @@ class FullAddQuantityCard extends StatelessWidget {
     this.onCommitted,
     this.max,
     this.validationMessage,
+    this.showSteppers = true,
     super.key,
   });
 
@@ -113,6 +114,7 @@ class FullAddQuantityCard extends StatelessWidget {
   final ValueChanged<String>? onCommitted;
   final int? max;
   final String? validationMessage;
+  final bool showSteppers;
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +127,7 @@ class FullAddQuantityCard extends StatelessWidget {
           QuantityStepper(
             controller: controller,
             max: max,
+            showButtons: showSteppers,
             onChanged: onChanged,
             onCommitted: onCommitted,
           ),

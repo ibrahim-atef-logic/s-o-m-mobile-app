@@ -35,39 +35,44 @@ extension _FullAddBlocAsync on FullAddBloc {
           state.copyWith(
             lookingUp: false,
             item: item,
-            quantityText: '',
+            quantityText: state.autoMode ? '' : '1',
             fetchingQty: true,
             clearPrice: true,
           ),
         );
-        await _fetchOnHandOnly(emit);
+        await _fetchOnHandThenMaybePrice(emit);
       },
     );
   }
 
-  /// Inventory only — never calls item-price until qty Enter / Add.
-  Future<void> _fetchOnHandOnly(Emitter<FullAddState> emit) async {
+  /// Inventory first; fetch price when available sales qty exists.
+  Future<void> _fetchOnHandThenMaybePrice(Emitter<FullAddState> emit) async {
     final BarcodeItemEntity? item = state.item;
     if (item == null) {
       return;
     }
     final Either<Failure, WarehouseOnHandEntity> stock = await _actions
         .getOnHand(item: item, order: state.order);
-    stock.fold(
-      (Failure _) => emit(
+    await stock.fold(
+      (Failure _) async => emit(
         state.copyWith(
           fetchingQty: false,
           clearOnHand: true,
           validation: FullAddValidation.noStock,
         ),
       ),
-      (WarehouseOnHandEntity onHand) => emit(
-        state.copyWith(
-          fetchingQty: false,
-          onHand: onHand,
-          validation: FullAddValidation.none,
-        ),
-      ),
+      (WarehouseOnHandEntity onHand) async {
+        emit(
+          state.copyWith(
+            fetchingQty: false,
+            onHand: onHand,
+            validation: FullAddValidation.none,
+          ),
+        );
+        if (onHand.availableSalesQuantity > 0) {
+          await _resolvePrice(emit);
+        }
+      },
     );
   }
 

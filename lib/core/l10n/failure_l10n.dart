@@ -34,6 +34,9 @@ extension FailureL10n on Failure {
     if (isLineAlreadyExists || _isLineAlreadyExists(raw)) {
       return l10n.errorLineAlreadyExists;
     }
+    if (apiCode == ApiErrorCode.barcodeNotFound) {
+      return l10n.errorBarcodeNotFoundTryItem;
+    }
     if (isItemNotFound) {
       return l10n.errorItemNotFound;
     }
@@ -181,8 +184,10 @@ extension FailureL10n on Failure {
     if (_isLineAlreadyExists(message)) {
       return l10n.errorLineAlreadyExists;
     }
-    if (message.toUpperCase().contains('ITEM_NOT_FOUND') ||
-        message.toUpperCase().contains('BARCODE_NOT_FOUND')) {
+    if (message.toUpperCase().contains('BARCODE_NOT_FOUND')) {
+      return l10n.errorBarcodeNotFoundTryItem;
+    }
+    if (message.toUpperCase().contains('ITEM_NOT_FOUND')) {
       return l10n.errorItemNotFound;
     }
     if (message.toUpperCase().contains('FORBIDDEN_COMPANY')) {
